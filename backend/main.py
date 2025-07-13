@@ -1,0 +1,145 @@
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from pydantic import BaseModel
+from retriever import get_cached_search, trim_for_ctx, process_and_index_document, is_processing
+from hf_utils import generate_llm_response
+import logging
+import asyncio
+from fastapi.responses import StreamingResponse
+import base64
+import pathlib
+from functools import lru_cache
+
+# Ensure logger is configured before use if main is run standalone and other modules not yet imported.
+if not logging.getLogger().hasHandlers():
+    logging.basicConfig(level=logging.INFO)
+
+log = logging.getLogger("trl-api")
+
+app = FastAPI(title="TRL-AI local API")
+
+SYSTEM_PROMPT = (
+    "Você é um assistente de IA especializado em Tecnologia de Readiness Level (TRL) para aplicações militares. "
+    "Sua principal diretriz é a precisão e a fidelidade aos fatos. NÃO INVENTE informações sob nenhuma circunstância.\n"
+    "Sua função é ajudar a avaliar o nível de maturidade tecnológica de diferentes tecnologias "
+    "com base EXCLUSIVAMENTE nos documentos e glossário fornecidos.\n"
+    "Você tem acesso a:\n"
+    "1. Um glossário de termos técnicos (implícito no seu conhecimento, mas priorize o contexto documental).\n"
+    "2. Documentos específicos da tecnologia em análise (fornecidos como 'Contexto'). Cada trecho do contexto será prefixado com sua origem (ex: 'Fonte: NomedoDocumento.pdf, Seção: Introdução').\n\n"
+    "Ao responder perguntas que apresentem alternativas (ex: a, b, c):\n"
+    "- IMPERATIVO: Sua resposta DEVE respeitar OBRIGATORIAMENTE a estrutura de alternativas ou questões fornecidas na pergunta.\n"
+    "- Após identificar a alternativa, forneça uma JUSTIFICATIVA BREVE E DIRETA, baseada estritamente no 'Contexto', explicando o porquê da resposta.\n"
+    "- NÃO mencione alternativas que não foram fornecidas na pergunta, NÃO responda perguntas que não foram feitas.\n"
+    "- MANTENHA A RESPOSTA FINAL O MAIS CURTA E OBJETIVA POSSÍVEL, respeitando o formato acima.\n\n"
+    "Para todas as respostas:\n"
+    "- IMPERATIVO: Fundamente TODAS as suas afirmações e conclusões estritamente nas informações presentes nos trechos do 'Contexto' fornecidos. NÃO FAÇA suposições ou inferências além do que está explicitamente escrito.\n"
+    "- CITE AS FONTES: Ao usar uma informação para sua justificativa, referencie explicitamente a fonte e seção fornecida no 'Contexto' (ex: 'De acordo com NomedoDocumento.pdf, Seção Metodologia, afirma-se que...' ou '(Fonte: NomedoDocumento.pdf, Seção Resultados)'). Se a informação estiver em múltiplos trechos, cite o mais relevante ou todos, se prático.\n"
+    "- Se a informação não puder ser encontrada ou confirmada de forma conclusiva e inequívoca pelo contexto fornecido, ou se o contexto for insuficiente para responder à pergunta, responda 'INCOMPLETO'. "
+    "  NÃO tente responder de outra forma. Explique brevemente o motivo da incompletude (ex: 'A informação solicitada sobre X não foi encontrada nos trechos fornecidos do documento Y.', 'Os dados apresentados no contexto são insuficientes para determinar Z').\n"
+    "- Responda sempre em português."
+)
+
+
+class Ask(BaseModel):
+    question: str
+    technology_id: str
+    doc_ids: list[str] | None = None
+
+
+# File upload model
+class FileUpload(BaseModel):
+    technology_id: str
+    filename: str
+    content_base64: str
+    chunk_index: int = 0           # NEW
+    final: bool = True             # NEW
+
+
+class ProcessingStatus(BaseModel):
+    technology_id: str
+
+
+import base64, pathlib, os
+from fastapi.responses import StreamingResponse
+import traceback
+
+UPLOAD_ROOT = pathlib.Path(__file__).parent / "uploads"
+UPLOAD_ROOT.mkdir(exist_ok=True)
+
+@app.post("/upload-files")
+async def upload_files(data: FileUpload, background_tasks: BackgroundTasks):
+    log.info(f"Received /upload-files request for technology_id: {data.technology_id}, filename: {data.filename}, chunk: {data.chunk_index}, final: {data.final}")
+    tech_dir = UPLOAD_ROOT / data.technology_id
+    tech_dir.mkdir(exist_ok=True)
+    try:
+        file_bytes = base64.b64decode(data.content_base64)
+    except Exception as e:
+        raise HTTPException(400, f"Invalid base‑64 payload: {e}")
+
+    target = tech_dir / data.filename
+    append_mode = 'ab' if data.chunk_index > 0 else 'wb'
+    with open(target, append_mode) as fh:
+        fh.write(file_bytes)
+
+    if data.final:
+        # Process document in background
+        log.info(f"Adding process_and_index_document task to background for {data.filename}, tech_id: {data.technology_id}")
+        background_tasks.add_task(process_and_index_document, str(target), data.technology_id)
+        return {"status": "ok", "stored_as": str(target), "processing": "started"}
+    else:
+        log.info(f"Received partial file chunk {data.chunk_index} for {data.filename}, tech_id: {data.technology_id}")
+        return {"status": "partial", "index": data.chunk_index}
+
+@app.post("/status")
+async def check_status(data: ProcessingStatus):
+    """Check if a document is still being processed"""
+    log.info(f"Received /status request for technology_id: {data.technology_id}")
+    processing = is_processing(data.technology_id)
+    status_response = {
+        "technology_id": data.technology_id,
+        "status": "processing" if processing else "ready"
+    }
+    log.info(f"Returning status for {data.technology_id}: {status_response['status']}")
+    return status_response
+
+@app.post("/answer")
+async def answer(data: Ask):
+    log.info(f"Received /answer request for technology_id: '{data.technology_id}', question: '{data.question[:100]}...'")
+    try:
+        if is_processing(data.technology_id):
+            log.warning(f"Attempt to answer for tech_id '{data.technology_id}' while it is processing.")
+            raise HTTPException(
+                status_code=409,
+                detail=f"Document for technology_id '{data.technology_id}' is still being processed. Please wait and try again."
+            )
+        
+        passages = get_cached_search(data.question, tech_id=data.technology_id, k=6)
+        if not passages:
+            log.warning(f"No passages found by get_cached_search for tech_id '{data.technology_id}', question '{data.question[:100]}...'")
+            context = "Nenhum contexto específico encontrado para esta pergunta."
+        else:
+            log.info(f"Retrieved {len(passages)} passages for context. Trimming...")
+            context = trim_for_ctx(passages)
+            log.info(f"Context after trimming (length: {len(context)} chars): '{context[:200]}...'")
+        
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",
+             "content": f"### Tecnologia: {data.technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{data.question}"},
+        ]
+
+        log.info("=== Preparing messages for LLM ===")
+        log.info(f"System Prompt part:\n{SYSTEM_PROMPT}")
+        log.info(f"User Message part (with context and question):\n{messages[1]['content']}")
+        log.info("=================================")
+
+        response_content = await asyncio.to_thread(generate_llm_response, messages=messages)
+        log.info(f"LLM response for tech_id '{data.technology_id}', question '{data.question[:100]}...' -> Response: '{response_content[:200]}...'")
+        
+        return response_content
+
+    except ValueError as e:
+        log.error("Error in /answer", exc_info=True)
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        log.error("Error in /answer", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))

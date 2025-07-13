@@ -1,0 +1,21 @@
+name: rag-trl-calculator
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.13.0
+  - pip
+  - fastapi>=0.68.0
+  - uvicorn>=0.15.0
+  - pydantic>=1.8.0
+  - numpy>=1.21.0
+  - pytorch
+  - pip:
+    - chromadb>=0.4.0
+    - python-docx
+    - PyPDF2>=3.0.0
+    - sentence-transformers
+    - transformers
+    - accelerate
+    - langchain-text-splitters
