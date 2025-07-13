@@ -1,0 +1,45 @@
+{
+    "name": "TRL Helper",
+    "version": "0.1",
+    "manifest_version": 3,
+    "description": "Assistente AI para preenchimento do cálculo TRL",
+    "permissions": [
+      "storage",
+      "scripting",
+      "activeTab"
+    ],
+    "host_permissions": [
+      "https://avantec.eb.mil.br/*",
+      "http://127.0.0.1:8000/*"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["https://avantec.eb.mil.br/initialquestions*"],
+        "js": ["cs_initial.js"]
+      },
+      {
+        "matches": ["https://avantec.eb.mil.br/questionario1*"],
+        "js": ["cs_q1.js"]
+      },
+      {
+        "matches": [
+          "https://avantec.eb.mil.br/TRL1*",
+          "https://avantec.eb.mil.br/TRL2*",
+          "https://avantec.eb.mil.br/TRL3*",
+          "https://avantec.eb.mil.br/TRL4*",
+          "https://avantec.eb.mil.br/TRL5*",
+          "https://avantec.eb.mil.br/TRL6*",
+          "https://avantec.eb.mil.br/TRL7*",
+          "https://avantec.eb.mil.br/TRL8*",
+          "https://avantec.eb.mil.br/TRL9*"
+        ],
+        "js": ["cs_trl_qs.js"]
+      }
+    ],
+    "background": {
+      "service_worker": "sw.js"
+    },
+    "action": {
+      "default_title": "TRL-AI"
+    }
+  }
