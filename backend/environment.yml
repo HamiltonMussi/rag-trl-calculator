@@ -6,16 +6,16 @@ channels:
 dependencies:
   - python=3.13.0
   - pip
-  - fastapi>=0.68.0
-  - uvicorn>=0.15.0
-  - pydantic>=1.8.0
-  - numpy>=1.21.0
-  - pytorch
   - pip:
-    - chromadb>=0.4.0
-    - python-docx
-    - PyPDF2>=3.0.0
-    - sentence-transformers
-    - transformers
-    - accelerate
-    - langchain-text-splitters
+    - fastapi==0.115.9
+    - uvicorn==0.34.2
+    - pydantic==2.11.3
+    - numpy==2.2.5
+    - torch==2.7.0
+    - transformers==4.46.0
+    - accelerate==1.6.0
+    - chromadb==1.0.7
+    - python-docx==1.1.2
+    - PyPDF2==3.0.1
+    - sentence-transformers==4.1.0
+    - langchain-text-splitters==0.3.8
