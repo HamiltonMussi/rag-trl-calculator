@@ -155,7 +155,16 @@ Se não:
             return;
         }
 
-        const text = resp.text;
+        // Parse the JSON response and extract the answer
+        let text;
+        try {
+            const responseData = JSON.parse(resp.text);
+            text = responseData.answer || resp.text; // Fallback to raw text if answer field doesn't exist
+        } catch (e) {
+            // If parsing fails, use the raw text (backward compatibility)
+            text = resp.text;
+        }
+        
         hideLoader();
         
         // Log the response to console
