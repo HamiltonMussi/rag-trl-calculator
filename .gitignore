@@ -1,4 +1,13 @@
+# Backend
 /backend/data
-/backend/__pycache__
 /backend/store
 /backend/uploads
+/backend/sessions.json
+
+# Python cache files
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
