@@ -10,6 +10,7 @@ from llm.response_generator import generate_llm_response
 import asyncio
 import logging
 import uuid
+import json
 
 router = APIRouter()
 
@@ -17,8 +18,29 @@ log = logging.getLogger("trl-api")
 UPLOAD_ROOT = pathlib.Path(__file__).parent.parent / "uploads"
 UPLOAD_ROOT.mkdir(exist_ok=True)
 
-# Simple session store for technology_id
-sessions = {}
+# Persistent session store for technology_id
+SESSIONS_FILE = pathlib.Path(__file__).parent.parent / "sessions.json"
+
+def load_sessions():
+    """Load sessions from file"""
+    try:
+        if SESSIONS_FILE.exists():
+            with open(SESSIONS_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        log.warning(f"Could not load sessions file: {e}")
+    return {}
+
+def save_sessions(sessions_dict):
+    """Save sessions to file"""
+    try:
+        with open(SESSIONS_FILE, 'w') as f:
+            json.dump(sessions_dict, f)
+    except Exception as e:
+        log.error(f"Could not save sessions file: {e}")
+
+# Initialize sessions from file
+sessions = load_sessions()
 
 @router.post("/upload-files")
 async def upload_files(data: FileUpload, background_tasks: BackgroundTasks):
@@ -61,6 +83,7 @@ async def set_technology_context(data: SetTechnologyContext):
     """Set the technology context for a session"""
     session_id = data.session_id or str(uuid.uuid4())
     sessions[session_id] = data.technology_id
+    save_sessions(sessions)  # Persist session to file
     log.info(f"Set technology context for session {session_id}: {data.technology_id}")
     return {
         "session_id": session_id,
