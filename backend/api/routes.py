@@ -6,7 +6,7 @@ import os
 import traceback
 from processing.indexer import process_and_index_document, is_processing
 from retrieval.context_retriever import get_cached_search, trim_for_ctx
-from llm.response_generator import generate_llm_response
+from llm.response_generator import generate_llm_response, build_llm_prompt_and_messages
 import asyncio
 import logging
 import uuid
@@ -120,37 +120,14 @@ async def answer(data: Ask):
             log.info(f"Retrieved {len(passages)} passages for context. Trimming...")
             context = trim_for_ctx(passages)
             log.info(f"Context after trimming (length: {len(context)} chars): '{context[:200]}...'")
-        SYSTEM_PROMPT = (
-            "Você é um assistente de IA especializado em Tecnologia de Readiness Level (TRL) para aplicações militares. "
-            "Sua principal diretriz é a precisão e a fidelidade aos fatos. NÃO INVENTE informações sob nenhuma circunstância.\n"
-            "Sua função é ajudar a avaliar o nível de maturidade tecnológica de diferentes tecnologias "
-            "com base EXCLUSIVAMENTE nos documentos e glossário fornecidos.\n"
-            "Você tem acesso a:\n"
-            "1. Um glossário de termos técnicos (implícito no seu conhecimento, mas priorize o contexto documental).\n"
-            "2. Documentos específicos da tecnologia em análise (fornecidos como 'Contexto'). Cada trecho do contexto será prefixado com sua origem (ex: 'Fonte: NomedoDocumento.pdf, Seção: Introdução').\n\n"
-            "Ao responder perguntas que apresentem alternativas (ex: a, b, c):\n"
-            "- IMPERATIVO: Sua resposta DEVE respeitar OBRIGATORIAMENTE a estrutura de alternativas ou questões fornecidas na pergunta.\n"
-            "- Após identificar a alternativa, forneça uma JUSTIFICATIVA BREVE E DIRETA, baseada estritamente no 'Contexto', explicando o porquê da resposta.\n"
-            "- NÃO mencione alternativas que não foram fornecidas na pergunta, NÃO responda perguntas que não foram feitas.\n"
-            "- MANTENHA A RESPOSTA FINAL O MAIS CURTA E OBJETIVA POSSÍVEL, respeitando o formato acima.\n\n"
-            "Para todas as respostas:\n"
-            "- IMPERATIVO: Fundamente TODAS as suas afirmações e conclusões estritamente nas informações presentes nos trechos do 'Contexto' fornecidos. NÃO FAÇA suposições ou inferências além do que está explicitamente escrito.\n"
-            "- CITE AS FONTES: Ao usar uma informação para sua justificativa, referencie explicitamente a fonte e seção fornecida no 'Contexto' (ex: 'De acordo com NomedoDocumento.pdf, Seção Metodologia, afirma-se que...' ou '(Fonte: NomedoDocumento.pdf, Seção Resultados)'). Se a informação estiver em múltiplos trechos, cite o mais relevante ou todos, se prático.\n"
-            "- Se a informação não puder ser encontrada ou confirmada de forma conclusiva e inequívoca pelo contexto fornecido, ou se o contexto for insuficiente para responder à pergunta, responda 'INCOMPLETO'. "
-            "  NÃO tente responder de outra forma. Explique brevemente o motivo da incompletude (ex: 'A informação solicitada sobre X não foi encontrada nos trechos fornecidos do documento Y.', 'Os dados apresentados no contexto são insuficientes para determinar Z').\n"
-            "- Responda sempre em português."
-        )
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",
-             "content": f"### Tecnologia: {technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{data.question}"},
-        ]
+        # Use the shared function to build prompt and messages
+        system_prompt, messages = build_llm_prompt_and_messages(technology_id, context, data.question)
         log.info("=== Preparing messages for LLM ===")
-        log.info(f"System Prompt part:\n{SYSTEM_PROMPT}")
+        log.info(f"System Prompt part:\n{system_prompt}")
         log.info(f"User Message part (with context and question):\n{messages[1]['content']}")
         log.info("=================================")
         response_content = await asyncio.to_thread(generate_llm_response, messages=messages)
-        log.info(f"LLM response for tech_id '{technology_id}', question '{data.question[:100]}...' -> Response: '{response_content[:200]}...'" )
+        log.info(f"LLM response for tech_id '{technology_id}', question '{data.question[:100]}...' -> Response: '{response_content[:200]}...'")
         return response_content
     except ValueError as e:
         log.error("Error in /answer", exc_info=True)
