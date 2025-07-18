@@ -108,7 +108,12 @@ function logPrompt(title, content) {
 
 async function processTRLQuestion(question) {
     try {
-        const tech = await getTech();
+        const sessionId = await getSessionId();
+        if (!sessionId) {
+            alert("Session não encontrada. Recarregue a página para definir o contexto da tecnologia.");
+            return;
+        }
+        
         const questionText = question.querySelector('label').innerText.trim().replace(/[.:;]$/, '');
         const commentDiv = question.querySelector('.trl-comment-div');
         const commentLabel = commentDiv ? commentDiv.querySelector('label').innerText.trim().replace(/[.:;]$/, '') : '';
@@ -139,7 +144,7 @@ Se não:
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ 
                 question: questionContext, 
-                technology_id: tech.id
+                session_id: sessionId
             })
         });
 
@@ -256,6 +261,11 @@ if (document.readyState === "loading") {
 // Helper function to get technology info
 async function getTech() {
     return await chrome.runtime.sendMessage({type: "GET_TECH"});
+}
+
+// Helper function to get session ID
+async function getSessionId() {
+    return await chrome.runtime.sendMessage({type: "GET_SESSION_ID"});
 }
 
 // Helper function for API calls

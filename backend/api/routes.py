@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from .schemas import Ask, FileUpload, ProcessingStatus
+from .schemas import Ask, FileUpload, ProcessingStatus, SetTechnologyContext
 import base64
 import pathlib
 import os
@@ -9,12 +9,16 @@ from retrieval.context_retriever import get_cached_search, trim_for_ctx
 from llm.response_generator import generate_llm_response
 import asyncio
 import logging
+import uuid
 
 router = APIRouter()
 
 log = logging.getLogger("trl-api")
 UPLOAD_ROOT = pathlib.Path(__file__).parent.parent / "uploads"
 UPLOAD_ROOT.mkdir(exist_ok=True)
+
+# Simple session store for technology_id
+sessions = {}
 
 @router.post("/upload-files")
 async def upload_files(data: FileUpload, background_tasks: BackgroundTasks):
@@ -52,19 +56,42 @@ async def check_status(data: ProcessingStatus):
     log.info(f"Returning status for {data.technology_id}: {status_response['status']}")
     return status_response
 
+@router.post("/set-technology-context")
+async def set_technology_context(data: SetTechnologyContext):
+    """Set the technology context for a session"""
+    session_id = data.session_id or str(uuid.uuid4())
+    sessions[session_id] = data.technology_id
+    log.info(f"Set technology context for session {session_id}: {data.technology_id}")
+    return {
+        "session_id": session_id,
+        "technology_id": data.technology_id,
+        "status": "context_set"
+    }
+
 @router.post("/answer")
 async def answer(data: Ask):
-    log.info(f"Received /answer request for technology_id: '{data.technology_id}', question: '{data.question[:100]}...'" )
+    # Get technology_id from request or session
+    technology_id = data.technology_id
+    if not technology_id and data.session_id:
+        technology_id = sessions.get(data.session_id)
+    
+    if not technology_id:
+        raise HTTPException(
+            status_code=400,
+            detail="No technology_id provided. Either include technology_id in request or set technology context first."
+        )
+    
+    log.info(f"Received /answer request for technology_id: '{technology_id}', session_id: '{data.session_id}', question: '{data.question[:100]}...'" )
     try:
-        if is_processing(data.technology_id):
-            log.warning(f"Attempt to answer for tech_id '{data.technology_id}' while it is processing.")
+        if is_processing(technology_id):
+            log.warning(f"Attempt to answer for tech_id '{technology_id}' while it is processing.")
             raise HTTPException(
                 status_code=409,
-                detail=f"Document for technology_id '{data.technology_id}' is still being processed. Please wait and try again."
+                detail=f"Document for technology_id '{technology_id}' is still being processed. Please wait and try again."
             )
-        passages = get_cached_search(data.question, tech_id=data.technology_id, k=6)
+        passages = get_cached_search(data.question, tech_id=technology_id, k=6)
         if not passages:
-            log.warning(f"No passages found by get_cached_search for tech_id '{data.technology_id}', question '{data.question[:100]}...'" )
+            log.warning(f"No passages found by get_cached_search for tech_id '{technology_id}', question '{data.question[:100]}...'" )
             context = "Nenhum contexto específico encontrado para esta pergunta."
         else:
             log.info(f"Retrieved {len(passages)} passages for context. Trimming...")
@@ -93,14 +120,14 @@ async def answer(data: Ask):
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user",
-             "content": f"### Tecnologia: {data.technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{data.question}"},
+             "content": f"### Tecnologia: {technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{data.question}"},
         ]
         log.info("=== Preparing messages for LLM ===")
         log.info(f"System Prompt part:\n{SYSTEM_PROMPT}")
         log.info(f"User Message part (with context and question):\n{messages[1]['content']}")
         log.info("=================================")
         response_content = await asyncio.to_thread(generate_llm_response, messages=messages)
-        log.info(f"LLM response for tech_id '{data.technology_id}', question '{data.question[:100]}...' -> Response: '{response_content[:200]}...'" )
+        log.info(f"LLM response for tech_id '{technology_id}', question '{data.question[:100]}...' -> Response: '{response_content[:200]}...'" )
         return response_content
     except ValueError as e:
         log.error("Error in /answer", exc_info=True)
