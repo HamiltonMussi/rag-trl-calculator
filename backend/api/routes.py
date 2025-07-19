@@ -71,8 +71,13 @@ async def upload_files(data: FileUpload, background_tasks: BackgroundTasks):
             f"filename: {data.filename}, chunk: {data.chunk_index}, final: {data.final}"
         )
         
-        # Create technology directory
+        # Create technology directory (clean it if it exists to replace documents)
         tech_dir = UPLOAD_ROOT / data.technology_id
+        if tech_dir.exists() and data.chunk_index == 0:
+            # Clean existing files when starting a new upload (first chunk)
+            import shutil
+            shutil.rmtree(tech_dir)
+            logger.info(f"Cleaned existing directory {tech_dir} for document replacement")
         tech_dir.mkdir(exist_ok=True)
         
         # Decode base64 content

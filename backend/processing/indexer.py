@@ -81,12 +81,22 @@ def process_and_index_document(file_path: str, tech_id: str):
             processing_status[tech_id] = False
             return False
         collection_name = f"tech_{tech_id}"
-        logger.info(f"Preparing to add {len(chunk_texts)} chunks to ChromaDB collection '{collection_name}'.")
-        collection = client.get_or_create_collection(
+        logger.info(f"Preparing to replace documents in ChromaDB collection '{collection_name}'.")
+        
+        # Try to get existing collection and delete it if it exists
+        try:
+            existing_collection = client.get_collection(name=collection_name)
+            logger.info(f"Found existing collection '{collection_name}', deleting to replace with new documents.")
+            client.delete_collection(name=collection_name)
+        except Exception:
+            logger.info(f"No existing collection '{collection_name}' found, creating new one.")
+        
+        # Create fresh collection
+        collection = client.create_collection(
             name=collection_name,
             metadata={"hnsw:space": "cosine"}
         )
-        logger.info(f"ChromaDB collection '{collection_name}' obtained/created.")
+        logger.info(f"ChromaDB collection '{collection_name}' created fresh.")
         logger.info(f"Attempting to add {len(chunk_texts)} items to collection '{collection_name}'...")
         collection.add(
             documents=chunk_texts,
