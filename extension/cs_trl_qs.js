@@ -6,26 +6,44 @@ function addAIButtons() {
         const aiButton = document.createElement('button');
         aiButton.innerHTML = '<i class="fa fa-robot"></i> AI Assist';
         aiButton.type = 'button'; // Prevent form submission
+        aiButton.className = 'ai-assist-button'; // Add class for easier selection
+        
+        // Check if AI is disabled
+        const isDisabled = window.aiDisabled || false;
+        
         aiButton.style = `
             position: absolute;
             right: 10px;
             top: 10px;
-            background: #3498db;
+            background: ${isDisabled ? '#9ca3af' : '#3498db'};
             color: white;
             border: none;
             padding: 5px 10px;
             border-radius: 4px;
-            cursor: pointer;
+            cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
             font-size: 12px;
             display: flex;
             align-items: center;
             gap: 5px;
+            opacity: ${isDisabled ? '0.6' : '1'};
         `;
+        
+        if (isDisabled) {
+            aiButton.disabled = true;
+            aiButton.title = 'Documentos não carregados. Por favor, faça upload dos documentos primeiro.';
+        }
         
         // Add click handler
         aiButton.onclick = async (e) => {
             e.preventDefault(); // Prevent default button behavior
             e.stopPropagation(); // Stop event bubbling
+            
+            // Check if AI is disabled
+            if (window.aiDisabled) {
+                alert('Por favor, faça upload dos documentos da tecnologia primeiro antes de usar a assistência da IA.');
+                return;
+            }
+            
             await processTRLQuestion(question);
         };
         
@@ -35,76 +53,7 @@ function addAIButtons() {
     });
 }
 
-// Add debug panel to the page
-function addDebugPanel() {
-    const debugPanel = document.createElement("div");
-    debugPanel.id = "trlDebugPanel";
-    debugPanel.style = `
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: #f8f9fa;
-        border-top: 1px solid #ddd;
-        padding: 10px;
-        z-index: 9999;
-        max-height: 200px;
-        overflow-y: auto;
-        font-family: monospace;
-        font-size: 12px;
-    `;
-    
-    const toggleButton = document.createElement("button");
-    toggleButton.textContent = "Toggle Debug";
-    toggleButton.style = `
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background: #3498db;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        z-index: 10000;
-    `;
-    
-    toggleButton.onclick = () => {
-        debugPanel.style.display = debugPanel.style.display === "none" ? "block" : "none";
-    };
-    
-    document.body.appendChild(debugPanel);
-    document.body.appendChild(toggleButton);
-}
 
-// Modified logging function
-function logPrompt(title, content) {
-    const debugPanel = document.querySelector("#trlDebugPanel");
-    if (!debugPanel) return;
-    
-    const logEntry = document.createElement("div");
-    logEntry.style = `
-        margin-bottom: 10px;
-        padding: 10px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    `;
-    
-    const timestamp = new Date().toLocaleTimeString();
-    logEntry.innerHTML = `
-        <div style="color: #666; margin-bottom: 5px;">${timestamp} - ${title}</div>
-        <pre style="margin: 0; white-space: pre-wrap;">${content}</pre>
-    `;
-    
-    debugPanel.appendChild(logEntry);
-    debugPanel.scrollTop = debugPanel.scrollHeight;
-    
-    // Also log to console
-    console.log(`=== ${title} ===`);
-    console.log(content);
-    console.log("=====================");
-}
 
 async function processTRLQuestion(question) {
     try {
@@ -256,15 +205,31 @@ function showAnswer(text, question) {
     };
 }
 
+// Initialize AI state from storage
+async function initializeAIState() {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+        try {
+            const result = await chrome.storage.local.get(['aiDisabled']);
+            window.aiDisabled = result.aiDisabled || false;
+        } catch (error) {
+            console.log('Could not read AI state from storage:', error);
+            window.aiDisabled = false;
+        }
+    } else {
+        window.aiDisabled = false;
+    }
+}
+
 // Initialize when the page loads
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+        await initializeAIState();
         addAIButtons();
-        addDebugPanel();
     });
 } else {
-    addAIButtons();
-    addDebugPanel();
+    initializeAIState().then(() => {
+        addAIButtons();
+    });
 }
 
 // Helper function to get technology info

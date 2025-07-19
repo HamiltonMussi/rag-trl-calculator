@@ -77,27 +77,379 @@ function hideLoader(){
     const modal = document.createElement("div");
     modal.innerHTML = `
       <div id="trlModal" style="position:fixed;top:0;left:0;width:100%;height:100%;
-          background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999">
-        <div style="background:#fff;padding:20px;border-radius:6px;width:400px">
-          <h3>Envie os documentos da tecnologia</h3>
-          <input type="file" id="fileInput" multiple /><br><br>
-          <button id="sendBtn">Enviar</button>
+          background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:9999;
+          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;">
+        <div style="background:#fff;padding:0;border-radius:12px;width:520px;max-width:90vw;
+            box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);transform:scale(0.95);
+            animation:modalSlideIn 0.3s ease-out forwards;">
+          
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+              color:white;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center;">
+            <div style="font-size:24px;font-weight:600;margin-bottom:8px;">
+              📄 Upload de Documentos
+            </div>
+            <div style="font-size:14px;opacity:0.9;">
+              Envie os documentos da sua tecnologia para análise
+            </div>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding:32px;">
+            <!-- Drop Zone -->
+            <div id="dropZone" style="border:2px dashed #d1d5db;border-radius:8px;padding:40px 20px;
+                text-align:center;transition:all 0.3s ease;cursor:pointer;background:#f9fafb;
+                margin-bottom:24px;">
+              <div style="font-size:48px;margin-bottom:16px;">📁</div>
+              <div style="font-size:16px;font-weight:500;color:#374151;margin-bottom:8px;">
+                Arraste e solte seus arquivos aqui
+              </div>
+              <div style="font-size:14px;color:#6b7280;margin-bottom:16px;">
+                ou clique para selecionar
+              </div>
+              <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" 
+                  style="display:none;" />
+              <div id="selectFilesBtn" style="display:inline-block;background:#667eea;color:white;padding:10px 20px;
+                  border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;
+                  transition:background 0.2s ease;">
+                Selecionar Arquivos
+              </div>
+            </div>
+            
+            <!-- File List -->
+            <div id="fileList" style="display:none;margin-bottom:24px;">
+              <div style="font-size:14px;font-weight:500;color:#374151;margin-bottom:12px;">
+                📋 Arquivos Selecionados:
+              </div>
+              <div id="fileItems" style="max-height:150px;overflow-y:auto;"></div>
+            </div>
+            
+            <!-- Progress -->
+            <div id="uploadProgress" style="display:none;margin-bottom:24px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:14px;font-weight:500;color:#374151;">Enviando...</span>
+                <span id="progressText" style="font-size:14px;color:#6b7280;">0%</span>
+              </div>
+              <div style="background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden;">
+                <div id="progressBar" style="background:linear-gradient(90deg,#667eea,#764ba2);
+                    height:100%;transition:width 0.3s ease;width:0%;"></div>
+              </div>
+            </div>
+            
+            <!-- Actions -->
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+              <button id="cancelBtn" style="background:#f3f4f6;color:#374151;border:none;
+                  padding:12px 24px;border-radius:6px;font-size:14px;font-weight:500;
+                  cursor:pointer;transition:background 0.2s ease;">
+                Cancelar
+              </button>
+              <button id="sendBtn" disabled style="background:#9ca3af;color:white;border:none;
+                  padding:12px 24px;border-radius:6px;font-size:14px;font-weight:500;
+                  cursor:not-allowed;transition:all 0.2s ease;">
+                Enviar Documentos
+              </button>
+            </div>
+          </div>
         </div>
-      </div>`;
+      </div>
+      
+      <!-- CSS Animations -->
+      <style>
+        @keyframes modalSlideIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        #dropZone:hover {
+          border-color: #667eea !important;
+          background: #f0f4ff !important;
+        }
+        #dropZone.dragover {
+          border-color: #667eea !important;
+          background: #e0e7ff !important;
+          transform: scale(1.02);
+        }
+        #sendBtn:not(:disabled) {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          cursor: pointer !important;
+        }
+        #sendBtn:not(:disabled):hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        #cancelBtn:hover {
+          background: #e5e7eb !important;
+        }
+        .file-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 12px;
+          background: #f9fafb;
+          border-radius: 6px;
+          margin-bottom: 8px;
+          font-size: 14px;
+        }
+        .file-item:last-child {
+          margin-bottom: 0;
+        }
+        .file-name {
+          color: #374151;
+          font-weight: 500;
+        }
+        .file-size {
+          color: #6b7280;
+          font-size: 12px;
+        }
+        .file-remove {
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+        .file-remove:hover {
+          background: #dc2626;
+        }
+      </style>`;
     document.body.appendChild(modal);
   
-    document.querySelector("#sendBtn").onclick = async () => {
-      const files = document.querySelector("#fileInput").files;
-      const tech = await getTech();
-      showLoader("Enviando documentos…");
-      let index = 0;
-      for (const f of files){
-        showLoader(`Enviando ${++index}/${files.length}…`);
-        await uploadFile(f, tech);
+    // Setup drag and drop functionality
+    const dropZone = document.querySelector("#dropZone");
+    const fileInput = document.querySelector("#fileInput");
+    const fileList = document.querySelector("#fileList");
+    const fileItems = document.querySelector("#fileItems");
+    const sendBtn = document.querySelector("#sendBtn");
+    const cancelBtn = document.querySelector("#cancelBtn");
+    const uploadProgress = document.querySelector("#uploadProgress");
+    const progressBar = document.querySelector("#progressBar");
+    const progressText = document.querySelector("#progressText");
+    const selectFilesBtn = document.querySelector("#selectFilesBtn");
+    
+    let selectedFiles = [];
+    
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+      console.log('File input changed, files:', e.target.files.length);
+      handleFileSelection();
+    });
+    
+    // Select files button click handler
+    selectFilesBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Select files button clicked');
+      fileInput.click();
+    });
+    
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files);
+      console.log('Files dropped:', files.length);
+      handleFiles(files);
+    });
+    
+    // Drop zone click handler (but not on the select button)
+    dropZone.addEventListener('click', (e) => {
+      if (e.target === dropZone && !e.target.closest('#selectFilesBtn')) {
+        console.log('Drop zone clicked');
+        fileInput.click();
       }
+    });
+    
+    function handleFileSelection() {
+      const files = Array.from(fileInput.files);
+      console.log('handleFileSelection called, files found:', files.length);
+      handleFiles(files);
+    }
+    
+    function handleFiles(files) {
+      console.log('handleFiles called with:', files.length, 'files');
+      selectedFiles = files;
+      updateFileList();
+      updateSendButton();
+    }
+    
+    function updateFileList() {
+      console.log('updateFileList called, selectedFiles.length:', selectedFiles.length);
+      if (selectedFiles.length === 0) {
+        fileList.style.display = 'none';
+        return;
+      }
+      
+      fileList.style.display = 'block';
+      fileItems.innerHTML = '';
+      
+      selectedFiles.forEach((file, index) => {
+        console.log(`Adding file ${index}: ${file.name} (${file.size} bytes)`);
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        fileItem.innerHTML = `
+          <div>
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${fileSize} MB</div>
+          </div>
+          <button class="file-remove" data-index="${index}">Remover</button>
+        `;
+        
+        // Add event listener to the remove button
+        const removeBtn = fileItem.querySelector('.file-remove');
+        removeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const fileIndex = parseInt(this.getAttribute('data-index'));
+          console.log('Removing file at index:', fileIndex);
+          removeFile(fileIndex);
+        });
+        
+        fileItems.appendChild(fileItem);
+      });
+    }
+    
+    function updateSendButton() {
+      console.log('updateSendButton called, selectedFiles.length:', selectedFiles.length);
+      if (selectedFiles.length > 0) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = `Enviar ${selectedFiles.length} Documento${selectedFiles.length > 1 ? 's' : ''}`;
+        console.log('Send button enabled');
+      } else {
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Enviar Documentos';
+        console.log('Send button disabled');
+      }
+    }
+    
+    function removeFile(index) {
+      console.log('removeFile called with index:', index);
+      console.log('selectedFiles before removal:', selectedFiles.length);
+      
+      selectedFiles.splice(index, 1);
+      console.log('selectedFiles after removal:', selectedFiles.length);
+      
+      updateFileList();
+      updateSendButton();
+      
+      // Update file input
+      try {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+        console.log('File input updated successfully');
+      } catch (error) {
+        console.log('Could not update file input:', error);
+      }
+    }
+    
+    function updateProgress(current, total) {
+      const percentage = Math.round((current / total) * 100);
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = `${percentage}%`;
+    }
+    
+    // Make functions globally accessible
+    window.disableAIButtons = function disableAIButtons() {
+      // Disable AI buttons in current page
+      const aiButtons = document.querySelectorAll('.ai-assist-button, button[innerHTML*="AI Assist"]');
+      aiButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.background = '#9ca3af';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.6';
+        btn.title = 'Documentos não carregados. Por favor, faça upload dos documentos primeiro.';
+      });
+      
+      // Set a flag to disable AI functionality globally
+      window.aiDisabled = true;
+      
+      // Store in chrome storage for persistence across pages
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.set({aiDisabled: true});
+      }
+      
+      console.log('AI buttons disabled - no documents uploaded');
+    }
+    
+    // Function to enable all AI buttons
+    window.enableAIButtons = function enableAIButtons() {
+      const aiButtons = document.querySelectorAll('.ai-assist-button, button[innerHTML*="AI Assist"]');
+      aiButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.style.background = '#3498db';
+        btn.style.cursor = 'pointer';
+        btn.style.opacity = '1';
+        btn.title = '';
+      });
+      
+      window.aiDisabled = false;
+      
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.set({aiDisabled: false});
+      }
+      
+      console.log('AI buttons enabled - documents uploaded successfully');
+    }
+
+    cancelBtn.onclick = () => {
+      // Disable AI functionality when user cancels upload
+      disableAIButtons();
       document.querySelector("#trlModal").remove();
-      showLoader("Consultando IA…");
-      await runQA();          // runQA now awaits; we'll hide loader inside it
+    };
+    
+    sendBtn.onclick = async () => {
+      if (selectedFiles.length === 0) return;
+      
+      const tech = await getTech();
+      
+      // Hide file selection, show progress
+      document.querySelector("#dropZone").style.display = 'none';
+      fileList.style.display = 'none';
+      uploadProgress.style.display = 'block';
+      sendBtn.style.display = 'none';
+      cancelBtn.textContent = 'Fechar';
+      
+      try {
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+          updateProgress(i, selectedFiles.length);
+          await uploadFile(file, tech);
+        }
+        
+        updateProgress(selectedFiles.length, selectedFiles.length);
+        
+        // Success state
+        progressText.textContent = 'Concluído!';
+        progressBar.style.background = '#10b981';
+        
+        setTimeout(() => {
+          // Enable AI buttons after successful upload
+          enableAIButtons();
+          document.querySelector("#trlModal").remove();
+          showLoader("Consultando IA…");
+          runQA();
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        progressText.textContent = 'Erro no upload';
+        progressBar.style.background = '#ef4444';
+        alert('Erro ao enviar arquivos: ' + error.message);
+      }
     };
   }
   
@@ -154,7 +506,7 @@ Se múltiplas alternativas estiverem corretas, indique a última que estiver cor
         }
 
         // Update loader message and wait before checking again
-        showLoader("Processando documento... Por favor, aguarde.");
+        showLoader("Processando documentos... Por favor, aguarde.");
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before checking again
     }
 
