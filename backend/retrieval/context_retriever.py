@@ -14,21 +14,83 @@ col = client.get_or_create_collection("trl")
 
 def get_cached_search(question: str, tech_id: str, k: int) -> List[Dict]:
     logger.info(f"get_cached_search called with question: '{question[:100]}...', tech_id: '{tech_id}', k: {k}")
-    if tech_id and is_processing(tech_id):
+    if is_processing(tech_id):
         logger.warning(f"Attempt to search for tech_id '{tech_id}' while it is still processing.")
         raise ValueError("Document is still being processed. Please wait.")
+    
     q_emb = get_hf_embeddings([question])[0]
-    if not tech_id:
-        target_collection_name = "trl"
-    else:
-        target_collection_name = f"tech_{tech_id}"
-    current_collection = client.get_or_create_collection(target_collection_name)
-    logger.info(f"Querying collection '{target_collection_name}' for tech_id '{tech_id if tech_id else 'glossary'}'")
-    res = current_collection.query(
+    all_candidates = []
+    
+    # Search technology-specific collection
+    tech_collection_name = f"tech_{tech_id}"
+    tech_collection = client.get_or_create_collection(tech_collection_name)
+    logger.info(f"Querying collection '{tech_collection_name}' for tech_id '{tech_id}'")
+    tech_res = tech_collection.query(
         query_embeddings=[q_emb],
-        n_results=k,
-        include=["documents", "metadatas"]
+        n_results=k * 2,  # Get more candidates to ensure good ranking
+        include=["documents", "metadatas", "distances"]
     )
+    tech_candidates = _process_collection_results_with_scores(tech_res, tech_id=tech_id)
+    all_candidates.extend(tech_candidates)
+    
+    # Always search TRL collection for universal glossary context
+    trl_collection = client.get_or_create_collection("trl")
+    logger.info(f"Querying TRL collection for universal glossary context")
+    trl_res = trl_collection.query(
+        query_embeddings=[q_emb],
+        n_results=k * 2,  # Get more candidates to ensure good ranking
+        include=["documents", "metadatas", "distances"]
+    )
+    trl_candidates = _process_collection_results_with_scores(trl_res, tech_id=None)
+    all_candidates.extend(trl_candidates)
+    
+    # Sort all candidates by similarity score (lower distance = higher similarity)
+    all_candidates.sort(key=lambda x: x['distance'])
+    
+    # Take the top k results based on similarity
+    results = [candidate for candidate in all_candidates[:k]]
+    
+    # Count results by source for logging
+    tech_count = sum(1 for r in results if r['source_document'] != 'Glossário TRL')
+    trl_count = len(results) - tech_count
+    
+    logger.info(f"Selected top {len(results)} results by similarity: {tech_count} from tech collection, {trl_count} from TRL collection")
+    logger.info(f"Retrieved {len(results)} total passage objects from ChromaDB")
+    if results:
+        logger.info(f"First result (best similarity): text='{results[0]['text'][:50]}...', source='{results[0]['source_document']}', distance={results[0]['distance']:.4f}")
+    
+    return results
+
+def _process_collection_results_with_scores(res, tech_id: str = None) -> List[Dict]:
+    """Process ChromaDB query results with similarity scores into standardized format."""
+    results = []
+    if res and res["documents"] and len(res["documents"][0]) > 0:
+        docs = res["documents"][0]
+        metas = res["metadatas"][0] if res["metadatas"] and len(res["metadatas"][0]) == len(docs) else [{}] * len(docs)
+        distances = res["distances"][0] if res["distances"] and len(res["distances"][0]) == len(docs) else [float('inf')] * len(docs)
+        
+        for doc_text, meta_info, distance in zip(docs, metas, distances):
+            if tech_id:
+                # For technology documents, use filename from metadata
+                source_doc_name = meta_info.get('source', f'Tech {tech_id} Document')
+            else:
+                source_doc_name = "Glossário TRL"
+            
+            section_name = meta_info.get('section', 'N/A')
+            if not tech_id and meta_info.get('type') == 'glossary_chunk':
+                section_name = f"Termo(s): {meta_info.get('terms', 'N/A')}"
+            
+            results.append({
+                "text": doc_text,
+                "metadata": meta_info,
+                "source_document": source_doc_name,
+                "source_section": section_name,
+                "distance": distance
+            })
+    return results
+
+def _process_collection_results(res, tech_id: str = None) -> List[Dict]:
+    """Process ChromaDB query results into standardized format (backward compatibility)."""
     results = []
     if res and res["documents"] and len(res["documents"][0]) > 0:
         docs = res["documents"][0]
@@ -36,22 +98,20 @@ def get_cached_search(question: str, tech_id: str, k: int) -> List[Dict]:
         for doc_text, meta_info in zip(docs, metas):
             if tech_id:
                 # For technology documents, use filename from metadata
-                source_doc_name = meta_info['source']
+                source_doc_name = meta_info.get('source', f'Tech {tech_id} Document')
             else:
                 source_doc_name = "Glossário TRL"
             
             section_name = meta_info.get('section', 'N/A')
             if not tech_id and meta_info.get('type') == 'glossary_chunk':
                 section_name = f"Termo(s): {meta_info.get('terms', 'N/A')}"
+            
             results.append({
                 "text": doc_text,
                 "metadata": meta_info,
                 "source_document": source_doc_name,
                 "source_section": section_name
             })
-    logger.info(f"Retrieved {len(results)} passage objects from ChromaDB for '{tech_id if tech_id else 'glossary'}'.")
-    if results:
-        logger.info(f"First retrieved passage object example: text='{results[0]['text'][:50]}...', source_document='{results[0]['source_document']}', source_section='{results[0]['source_section']}'")
     return results
 
 def trim_for_ctx(passages: List[Dict], limit: int = 3500) -> str:
