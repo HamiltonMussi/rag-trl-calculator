@@ -4,14 +4,16 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 from .schemas import (
     Ask, FileUpload, ProcessingStatus, SetTechnologyContext,
-    ErrorResponse, FileUploadResponse, ProcessingStatusResponse,
-    SetTechnologyContextResponse, AnswerResponse
+    ListFiles, RemoveFile, ErrorResponse, FileUploadResponse, 
+    ProcessingStatusResponse, SetTechnologyContextResponse, 
+    AnswerResponse, ListFilesResponse, RemoveFileResponse, FileInfo
 )
 import base64
 import pathlib
 import os
 import traceback
-from processing.indexer import process_and_index_document, is_processing
+from datetime import datetime
+from processing.indexer import process_and_index_document, is_processing, remove_document_from_index
 from retrieval.context_retriever import get_cached_search, trim_for_ctx
 from llm.response_generator import generate_llm_response, build_llm_prompt_and_messages
 from services.session_manager import SessionManager
@@ -262,4 +264,96 @@ async def answer(data: Ask):
             ).model_dump()
         )
     except Exception as e:
-        return handle_api_error(e, "Error generating answer") 
+        return handle_api_error(e, "Error generating answer")
+
+@router.post("/list-files", response_model=ListFilesResponse)
+async def list_files(data: ListFiles):
+    """
+    List all uploaded files for a technology.
+    
+    Args:
+        data: Technology ID to list files for
+        
+    Returns:
+        List of uploaded files with their metadata
+    """
+    try:
+        logger.info(f"Received /list-files request for technology_id: {data.technology_id}")
+        
+        # Check if technology directory exists
+        tech_dir = UPLOAD_ROOT / data.technology_id
+        if not tech_dir.exists():
+            return ListFilesResponse(
+                technology_id=data.technology_id,
+                files=[]
+            )
+        
+        files = []
+        for file_path in tech_dir.iterdir():
+            if file_path.is_file():
+                stat = file_path.stat()
+                files.append(FileInfo(
+                    filename=file_path.name,
+                    size=stat.st_size,
+                    uploaded_at=datetime.fromtimestamp(stat.st_mtime).isoformat()
+                ))
+        
+        # Sort files by upload time (newest first)
+        files.sort(key=lambda x: x.uploaded_at, reverse=True)
+        
+        logger.info(f"Found {len(files)} files for technology_id: {data.technology_id}")
+        
+        return ListFilesResponse(
+            technology_id=data.technology_id,
+            files=files
+        )
+        
+    except Exception as e:
+        return handle_api_error(e, "Error listing files")
+
+@router.post("/remove-file", response_model=RemoveFileResponse)
+async def remove_file(data: RemoveFile):
+    """
+    Remove a specific file from a technology.
+    
+    Args:
+        data: Technology ID and filename to remove
+        
+    Returns:
+        Confirmation of file removal
+    """
+    try:
+        logger.info(f"Received /remove-file request for technology_id: {data.technology_id}, filename: {data.filename}")
+        
+        # Check if file exists
+        tech_dir = UPLOAD_ROOT / data.technology_id
+        file_path = tech_dir / data.filename
+        
+        if not file_path.exists():
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=ErrorResponse(
+                    detail=f"File '{data.filename}' not found for technology '{data.technology_id}'",
+                    error_code="FILE_NOT_FOUND"
+                ).model_dump()
+            )
+        
+        # Remove file from filesystem
+        file_path.unlink()
+        logger.info(f"File {data.filename} removed from filesystem for technology_id: {data.technology_id}")
+        
+        # Remove from RAG index
+        success = remove_document_from_index(data.technology_id, data.filename)
+        if success:
+            logger.info(f"File {data.filename} removed from index for technology_id: {data.technology_id}")
+        else:
+            logger.warning(f"Failed to remove {data.filename} from index for technology_id: {data.technology_id}, but file was deleted from filesystem")
+        
+        return RemoveFileResponse(
+            technology_id=data.technology_id,
+            filename=data.filename,
+            status="removed"
+        )
+        
+    except Exception as e:
+        return handle_api_error(e, "Error removing file") 

@@ -34,7 +34,13 @@ def get_cached_search(question: str, tech_id: str, k: int) -> List[Dict]:
         docs = res["documents"][0]
         metas = res["metadatas"][0] if res["metadatas"] and len(res["metadatas"][0]) == len(docs) else [{}] * len(docs)
         for doc_text, meta_info in zip(docs, metas):
-            source_doc_name = f"Documento ID {tech_id}" if tech_id else "Glossário TRL"
+            if tech_id:
+                # For technology documents, use filename if available
+                source_filename = meta_info.get('source', 'arquivo_desconhecido')
+                source_doc_name = f"{source_filename}"
+            else:
+                source_doc_name = "Glossário TRL"
+            
             section_name = meta_info.get('section', 'N/A')
             if not tech_id and meta_info.get('type') == 'glossary_chunk':
                 section_name = f"Termo(s): {meta_info.get('terms', 'N/A')}"

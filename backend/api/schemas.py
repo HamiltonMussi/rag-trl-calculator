@@ -160,4 +160,71 @@ class AnswerResponse(BaseModel):
     """Response schema for question answers."""
     answer: str = Field(..., description="Generated answer")
     technology_id: str = Field(..., description="Technology identifier used")
-    session_id: Optional[str] = Field(None, description="Session identifier if applicable") 
+    session_id: Optional[str] = Field(None, description="Session identifier if applicable")
+
+
+class ListFiles(BaseModel):
+    """Request schema for listing files."""
+    technology_id: str = Field(
+        ..., 
+        min_length=1, 
+        max_length=100,
+        description="Technology identifier"
+    )
+    
+    @validator('technology_id')
+    def validate_technology_id(cls, v):
+        cleaned = re.sub(r'[<>"\']', '', v.strip())
+        if not cleaned:
+            raise ValueError('Technology ID cannot be empty after sanitization')
+        return cleaned
+
+
+class RemoveFile(BaseModel):
+    """Request schema for removing a file."""
+    technology_id: str = Field(
+        ..., 
+        min_length=1, 
+        max_length=100,
+        description="Technology identifier"
+    )
+    filename: str = Field(
+        ..., 
+        min_length=1, 
+        max_length=255,
+        description="Name of the file to remove"
+    )
+    
+    @validator('technology_id')
+    def validate_technology_id(cls, v):
+        cleaned = re.sub(r'[<>"\']', '', v.strip())
+        if not cleaned:
+            raise ValueError('Technology ID cannot be empty after sanitization')
+        return cleaned
+    
+    @validator('filename')
+    def validate_filename(cls, v):
+        # Basic filename validation
+        if not re.match(r'^[a-zA-Z0-9._-]+\.[a-zA-Z0-9]+$', v):
+            raise ValueError('Invalid filename format')
+        return v
+
+
+class FileInfo(BaseModel):
+    """File information schema."""
+    filename: str = Field(..., description="Name of the file")
+    size: int = Field(..., description="File size in bytes")
+    uploaded_at: str = Field(..., description="Upload timestamp")
+
+
+class ListFilesResponse(BaseModel):
+    """Response schema for listing files."""
+    technology_id: str = Field(..., description="Technology identifier")
+    files: List[FileInfo] = Field(..., description="List of uploaded files")
+
+
+class RemoveFileResponse(BaseModel):
+    """Response schema for file removal."""
+    technology_id: str = Field(..., description="Technology identifier")
+    filename: str = Field(..., description="Name of the removed file")
+    status: Literal["removed"] = Field(..., description="Operation status") 
