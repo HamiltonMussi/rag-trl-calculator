@@ -13,9 +13,8 @@ function addAIButtons() {
         
         aiButton.style = `
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 10px;
+            top: 10px;
             background: ${isDisabled ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
             color: white;
             border: none;
@@ -37,12 +36,12 @@ function addAIButtons() {
         // Add hover effects if not disabled
         if (!isDisabled) {
             aiButton.addEventListener('mouseenter', () => {
-                aiButton.style.transform = 'translateY(-50%) translateY(-1px)';
+                aiButton.style.transform = 'translateY(-1px)';
                 aiButton.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
             });
             
             aiButton.addEventListener('mouseleave', () => {
-                aiButton.style.transform = 'translateY(-50%)';
+                aiButton.style.transform = 'translateY(0)';
                 aiButton.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
             });
         }
