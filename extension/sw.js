@@ -19,6 +19,14 @@ chrome.runtime.onMessage.addListener((msg, sender, respond) => {
     getValidSessionId().then(respond);
     return true; // async response
   }
+  else if (msg.type === "LIST_FILES") {
+    listFiles(msg.technologyId).then(respond);
+    return true; // async response
+  }
+  else if (msg.type === "REMOVE_FILE") {
+    removeFile(msg.technologyId, msg.filename).then(respond);
+    return true; // async response
+  }
 
   else if (msg.type === "API_FETCH") {
     fetch(msg.url, msg.init)
@@ -102,4 +110,48 @@ async function validateSession(sessionId) {
   // The real validation happens when the actual question is sent
   console.log("Skipping session validation, assuming valid:", sessionId);
   return true;
+}
+
+async function listFiles(technologyId) {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/list-files", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ technology_id: technologyId })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Files listed successfully:", data);
+      return { ok: true, data: data };
+    } else {
+      console.error("Failed to list files:", response.status);
+      return { ok: false, error: `Failed to list files: ${response.status}` };
+    }
+  } catch (error) {
+    console.error("Error listing files:", error);
+    return { ok: false, error: error.toString() };
+  }
+}
+
+async function removeFile(technologyId, filename) {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/remove-file", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ technology_id: technologyId, filename: filename })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log("File removed successfully:", data);
+      return { ok: true, data: data };
+    } else {
+      console.error("Failed to remove file:", response.status);
+      return { ok: false, error: `Failed to remove file: ${response.status}` };
+    }
+  } catch (error) {
+    console.error("Error removing file:", error);
+    return { ok: false, error: error.toString() };
+  }
 }

@@ -87,10 +87,10 @@ function hideLoader(){
           <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
               color:white;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center;">
             <div style="font-size:24px;font-weight:600;margin-bottom:8px;">
-              📄 Upload de Documentos
+              📄 Gerenciar Documentos
             </div>
             <div style="font-size:14px;opacity:0.9;">
-              Envie os documentos da sua tecnologia para análise
+              Visualize, remova e adicione documentos da sua tecnologia
             </div>
           </div>
           
@@ -102,10 +102,10 @@ function hideLoader(){
                 margin-bottom:24px;">
               <div style="font-size:48px;margin-bottom:16px;">📁</div>
               <div style="font-size:16px;font-weight:500;color:#374151;margin-bottom:8px;">
-                Arraste e solte seus arquivos aqui
+                Adicionar Novos Arquivos
               </div>
               <div style="font-size:14px;color:#6b7280;margin-bottom:8px;">
-                ou clique para selecionar
+                Arraste e solte aqui ou clique para selecionar
               </div>
               <div style="font-size:12px;color:#ef4444;margin-bottom:16px;">
                 ⚠️ Não use espaços ou acentos no nome do arquivo
@@ -232,6 +232,10 @@ function hideLoader(){
     const selectFilesBtn = document.querySelector("#selectFilesBtn");
     
     let selectedFiles = [];
+    let existingFiles = [];
+    
+    // Load existing files when modal opens
+    loadExistingFilesData();
     
     // File input change handler
     fileInput.addEventListener('change', function(e) {
@@ -287,9 +291,37 @@ function hideLoader(){
       updateSendButton();
     }
     
+    async function loadExistingFilesData() {
+      try {
+        const tech = await getTech();
+        if (!tech || !tech.id) {
+          console.log('No technology selected');
+          return;
+        }
+
+        const response = await chrome.runtime.sendMessage({
+          type: "LIST_FILES",
+          technologyId: tech.id
+        });
+
+        if (response.ok && response.data) {
+          existingFiles = response.data.files.map(file => ({
+            ...file,
+            isExisting: true
+          }));
+          updateFileList();
+        }
+      } catch (error) {
+        console.error('Error loading existing files:', error);
+      }
+    }
+
     function updateFileList() {
-      console.log('updateFileList called, selectedFiles.length:', selectedFiles.length);
-      if (selectedFiles.length === 0) {
+      console.log('updateFileList called, selectedFiles.length:', selectedFiles.length, 'existingFiles.length:', existingFiles.length);
+      
+      const totalFiles = selectedFiles.length + existingFiles.length;
+      
+      if (totalFiles === 0) {
         fileList.style.display = 'none';
         return;
       }
@@ -297,27 +329,58 @@ function hideLoader(){
       fileList.style.display = 'block';
       fileItems.innerHTML = '';
       
+      // Add existing files first
+      existingFiles.forEach((file, index) => {
+        console.log(`Adding existing file ${index}: ${file.filename}`);
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        const uploadDate = new Date(file.uploaded_at).toLocaleDateString('pt-BR');
+        
+        fileItem.innerHTML = `
+          <div>
+            <div class="file-name">${file.filename} <span style="color:#10b981;font-size:11px;">✓ Carregado</span></div>
+            <div class="file-size">${fileSize} MB • ${uploadDate}</div>
+          </div>
+          <button class="file-remove" data-existing-filename="${file.filename}">Remover</button>
+        `;
+        
+        // Add event listener to the remove button for existing files
+        const removeBtn = fileItem.querySelector('.file-remove');
+        removeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const filename = this.getAttribute('data-existing-filename');
+          console.log('Removing existing file:', filename);
+          removeExistingFileFromList(filename);
+        });
+        
+        fileItems.appendChild(fileItem);
+      });
+      
+      // Add newly selected files
       selectedFiles.forEach((file, index) => {
-        console.log(`Adding file ${index}: ${file.name} (${file.size} bytes)`);
+        console.log(`Adding selected file ${index}: ${file.name} (${file.size} bytes)`);
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
         
         const fileSize = (file.size / 1024 / 1024).toFixed(2);
         fileItem.innerHTML = `
           <div>
-            <div class="file-name">${file.name}</div>
+            <div class="file-name">${file.name} <span style="color:#667eea;font-size:11px;">📤 Para enviar</span></div>
             <div class="file-size">${fileSize} MB</div>
           </div>
           <button class="file-remove" data-index="${index}">Remover</button>
         `;
         
-        // Add event listener to the remove button
+        // Add event listener to the remove button for selected files
         const removeBtn = fileItem.querySelector('.file-remove');
         removeBtn.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
           const fileIndex = parseInt(this.getAttribute('data-index'));
-          console.log('Removing file at index:', fileIndex);
+          console.log('Removing selected file at index:', fileIndex);
           removeFile(fileIndex);
         });
         
@@ -325,11 +388,59 @@ function hideLoader(){
       });
     }
     
+    async function removeExistingFileFromList(filename) {
+      if (!confirm(`Tem certeza que deseja remover o arquivo "${filename}"?`)) {
+        return;
+      }
+
+      try {
+        const tech = await getTech();
+        const response = await chrome.runtime.sendMessage({
+          type: "REMOVE_FILE",
+          technologyId: tech.id,
+          filename: filename
+        });
+
+        if (response.ok) {
+          // Remove from existingFiles array
+          existingFiles = existingFiles.filter(file => file.filename !== filename);
+          updateFileList();
+          
+          // Show success message
+          const notification = document.createElement('div');
+          notification.style = `
+            position:fixed;
+            top:20px;
+            left:50%;
+            transform:translateX(-50%);
+            background:#10b981;
+            color:white;
+            padding:12px 24px;
+            border-radius:6px;
+            z-index:10001;
+            font-size:14px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.15);
+          `;
+          notification.textContent = `Arquivo "${filename}" removido com sucesso!`;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, 3000);
+        } else {
+          alert(`Erro ao remover arquivo: ${response.error || 'Erro desconhecido'}`);
+        }
+      } catch (error) {
+        console.error('Error removing existing file:', error);
+        alert(`Erro ao remover arquivo: ${error.message}`);
+      }
+    }
+
     function updateSendButton() {
       console.log('updateSendButton called, selectedFiles.length:', selectedFiles.length);
       if (selectedFiles.length > 0) {
         sendBtn.disabled = false;
-        sendBtn.textContent = `Enviar ${selectedFiles.length} Documento${selectedFiles.length > 1 ? 's' : ''}`;
+        sendBtn.textContent = `Enviar ${selectedFiles.length} Novo${selectedFiles.length > 1 ? 's' : ''} Documento${selectedFiles.length > 1 ? 's' : ''}`;
         console.log('Send button enabled');
       } else {
         sendBtn.disabled = true;
@@ -439,10 +550,15 @@ function hideLoader(){
         progressText.textContent = 'Concluído!';
         progressBar.style.background = '#10b981';
         
+        // Clear selected files and reload existing files to show newly uploaded files
+        selectedFiles = [];
+        await loadExistingFilesData();
+        
         setTimeout(() => {
           // Enable AI buttons after successful upload
           enableAIButtons();
           document.querySelector("#trlModal").remove();
+          
           showLoader("Consultando IA…");
           runQA();
         }, 1500);
@@ -743,4 +859,132 @@ Se múltiplas alternativas estiverem corretas, indique a última que estiver cor
 
   function apiFetch(url, init){
     return chrome.runtime.sendMessage({type:"API_FETCH", url, init});
+  }
+
+
+  // Helper function to refresh file manager
+  async function loadFiles(technologyId) {
+    const filesList = document.querySelector("#filesList");
+    if (!filesList) return; // File manager not open
+    
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: "LIST_FILES",
+        technologyId: technologyId
+      });
+
+      if (response.ok && response.data) {
+        const files = response.data.files;
+        
+        if (files.length === 0) {
+          filesList.innerHTML = `
+            <div style="text-align: center; color: #666; padding: 20px;">
+              <div style="font-size: 24px; margin-bottom: 8px;">📭</div>
+              <div style="font-size: 14px;">Nenhum arquivo carregado</div>
+              <div style="font-size: 12px; color: #999;">Clique em "Adicionar Mais Arquivos" para começar</div>
+            </div>
+          `;
+        } else {
+          filesList.innerHTML = `
+            <div style="font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 12px;">
+              📋 ${files.length} arquivo${files.length > 1 ? 's' : ''} carregado${files.length > 1 ? 's' : ''}:
+            </div>
+            <div style="max-height: 200px; overflow-y: auto;" id="filesContainer"></div>
+          `;
+
+          const filesContainer = document.querySelector("#filesContainer");
+          files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.style = `
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 8px 12px;
+              background: #f9fafb;
+              border-radius: 6px;
+              margin-bottom: 8px;
+              font-size: 13px;
+            `;
+
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            const uploadDate = new Date(file.uploaded_at).toLocaleDateString('pt-BR');
+            
+            fileItem.innerHTML = `
+              <div style="flex: 1;">
+                <div style="color: #374151; font-weight: 500;">${file.filename}</div>
+                <div style="color: #6b7280; font-size: 11px;">${fileSize} MB • ${uploadDate}</div>
+              </div>
+              <button class="remove-file-btn" data-filename="${file.filename}" style="
+                background: #ef4444;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 11px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+              ">Remover</button>
+            `;
+            
+            filesContainer.appendChild(fileItem);
+          });
+
+          // Add event listeners to remove buttons
+          document.querySelectorAll('.remove-file-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const filename = e.target.getAttribute('data-filename');
+              await removeFileFromQ1(technologyId, filename);
+            });
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading files:', error);
+    }
+  }
+
+  async function removeFileFromQ1(technologyId, filename) {
+    if (!confirm(`Tem certeza que deseja remover o arquivo "${filename}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: "REMOVE_FILE",
+        technologyId: technologyId,
+        filename: filename
+      });
+
+      if (response.ok) {
+        // Reload the files list
+        await loadFiles(technologyId);
+        
+        // Show success message
+        const notification = document.createElement('div');
+        notification.style = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #10b981;
+          color: white;
+          padding: 12px 24px;
+          border-radius: 6px;
+          z-index: 10001;
+          font-size: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        notification.textContent = `Arquivo "${filename}" removido com sucesso!`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      } else {
+        alert(`Erro ao remover arquivo: ${response.error || 'Erro desconhecido'}`);
+      }
+    } catch (error) {
+      console.error('Error removing file:', error);
+      alert(`Erro ao remover arquivo: ${error.message}`);
+    }
   }

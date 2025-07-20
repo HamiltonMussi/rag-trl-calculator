@@ -22,3 +22,4 @@ function parseSpan(text) {
     const init = parseSpan(span.getAttribute("title") || span.textContent);
     if (init) chrome.runtime.sendMessage({type: "SET_TECH", payload: init});
   }
+
