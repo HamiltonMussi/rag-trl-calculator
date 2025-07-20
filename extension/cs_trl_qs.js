@@ -4,7 +4,7 @@ function addAIButtons() {
     questions.forEach((question, index) => {
         // Create AI button
         const aiButton = document.createElement('button');
-        aiButton.innerHTML = '<i class="fa fa-robot"></i> AI Assist';
+        aiButton.innerHTML = '<span style="font-size: 14px;">🤖</span> Assistente IA';
         aiButton.type = 'button'; // Prevent form submission
         aiButton.className = 'ai-assist-button'; // Add class for easier selection
         
@@ -13,20 +13,39 @@ function addAIButtons() {
         
         aiButton.style = `
             position: absolute;
-            right: 10px;
-            top: 10px;
-            background: ${isDisabled ? '#9ca3af' : '#3498db'};
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: ${isDisabled ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             opacity: ${isDisabled ? '0.6' : '1'};
+            box-shadow: ${isDisabled ? 'none' : '0 4px 12px rgba(102, 126, 234, 0.3)'};
+            transition: all 0.2s ease;
+            z-index: 100;
         `;
+        
+        // Add hover effects if not disabled
+        if (!isDisabled) {
+            aiButton.addEventListener('mouseenter', () => {
+                aiButton.style.transform = 'translateY(-50%) translateY(-1px)';
+                aiButton.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+            });
+            
+            aiButton.addEventListener('mouseleave', () => {
+                aiButton.style.transform = 'translateY(-50%)';
+                aiButton.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+            });
+        }
         
         if (isDisabled) {
             aiButton.disabled = true;
@@ -40,7 +59,7 @@ function addAIButtons() {
             
             // Check if AI is disabled
             if (window.aiDisabled) {
-                alert('Por favor, faça upload dos documentos da tecnologia primeiro antes de usar a assistência da IA.');
+                showNotification('Por favor, faça upload dos documentos da tecnologia primeiro antes de usar a assistência da IA.', 'info');
                 return;
             }
             
@@ -59,7 +78,7 @@ async function processTRLQuestion(question) {
     try {
         const sessionId = await getSessionId();
         if (!sessionId) {
-            alert("Session não encontrada. Recarregue a página para definir o contexto da tecnologia.");
+            showNotification("Session não encontrada. Recarregue a página para definir o contexto da tecnologia.", 'error');
             return;
         }
         
@@ -100,7 +119,7 @@ Se não:
         if (!resp.ok) {
             hideLoader();
             console.error("API Error:", resp);
-            alert("Erro ao consultar a API: " + (resp.error || resp.status));
+            showNotification("Erro ao consultar a API: " + (resp.error || resp.status), 'error');
             return;
         }
 
@@ -156,51 +175,83 @@ function showAnswer(text, question) {
     div.id = "aiAnswer"; // Add ID for easy removal
     div.style = `
         position: fixed;
-        top: 0;
-        right: 0;
-        width: 300px;
+        top: 20px;
+        right: 20px;
+        width: 380px;
         background: #fff;
-        border-left: 3px solid #3498db;
-        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         z-index: 9999;
-        padding: 15px;
         transform: translateX(0);
-        transition: transform 0.3s ease;
-        font-family: Arial, sans-serif;
+        transition: all 0.3s ease;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        overflow: hidden;
+        animation: slideInFromRight 0.3s ease-out;
     `;
     
+    // Add keyframe animation
+    if (!document.querySelector('#aiAnswerStyle')) {
+        const style = document.createElement("style");
+        style.id = 'aiAnswerStyle';
+        style.textContent = `
+            @keyframes slideInFromRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutToRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     div.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <b style="color: #3498db;">Sugestão da IA</b>
+        <!-- Header -->
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        ">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 20px;">🤖</span>
+                <span style="font-size: 16px; font-weight: 600;">Sugestão da IA</span>
+            </div>
             <button id="aiClose" style="
                 background: none;
                 border: none;
-                color: #666;
+                color: white;
                 cursor: pointer;
-                font-size: 16px;
-                padding: 0 5px;
-            ">×</button>
+                font-size: 18px;
+                padding: 4px;
+                border-radius: 4px;
+                transition: background 0.2s ease;
+                opacity: 0.9;
+            " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">×</button>
         </div>
-        <div style="
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            line-height: 1.4;
-        ">
-            ${formattedText}
+        
+        <!-- Content -->
+        <div style="padding: 24px;">
+            <div style="
+                background: #f8f9fc;
+                padding: 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                line-height: 1.6;
+                color: #374151;
+                border: 1px solid #e5e7eb;
+            ">
+                ${formattedText}
+            </div>
         </div>`;
     
     document.body.appendChild(div);
     
-    // Animate the popup sliding in
-    requestAnimationFrame(() => {
-        div.style.transform = 'translateX(0)';
-    });
-    
     document.querySelector("#aiClose").onclick = () => {
-        div.style.transform = 'translateX(100%)';
+        div.style.animation = 'slideOutToRight 0.3s ease-out forwards';
         setTimeout(() => div.remove(), 300);
     };
 }
@@ -253,18 +304,67 @@ function showLoader(msg) {
     if(!l) {
         l = document.createElement("div");
         l.id = "trlLoader";
-        l.style = "position:fixed;top:0;left:0;width:100%;height:100%;"+
-                  "background:rgba(255,255,255,0.7);display:flex;align-items:center;"+
-                  "justify-content:center;z-index:10000;flex-direction:column;";
+        l.style = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          backdrop-filter: blur(4px);
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        `;
         l.innerHTML = `
-            <div class="spinner" style="border:6px solid #f3f3f3;border-top:6px solid #3498db;
-                 border-radius:50%;width:40px;height:40px;animation:trlspin 1s linear infinite;">
-            </div>
-            <p id="trlLoaderText" style="margin-top:10px;font-weight:bold;"></p>`;
+            <div style="
+              background: white;
+              padding: 32px;
+              border-radius: 16px;
+              box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              min-width: 280px;
+              animation: fadeInScale 0.3s ease-out;
+            ">
+              <div style="
+                width: 48px;
+                height: 48px;
+                border: 4px solid #e5e7eb;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                animation: trlspin 1s linear infinite;
+                margin-bottom: 16px;
+              "></div>
+              <p id="trlLoaderText" style="
+                margin: 0;
+                font-weight: 500;
+                font-size: 16px;
+                color: #374151;
+                text-align: center;
+              "></p>
+            </div>`;
         document.body.appendChild(l);
-        const style = document.createElement("style");
-        style.textContent = "@keyframes trlspin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}";
-        document.head.appendChild(style);
+        
+        // Add enhanced animations
+        if (!document.querySelector('#trlLoaderStyle')) {
+          const style = document.createElement("style");
+          style.id = 'trlLoaderStyle';
+          style.textContent = `
+            @keyframes trlspin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes fadeInScale {
+              from { opacity: 0; transform: scale(0.9); }
+              to { opacity: 1; transform: scale(1); }
+            }
+          `;
+          document.head.appendChild(style);
+        }
     }
     l.querySelector("#trlLoaderText").textContent = msg;
     l.style.display = "flex";
@@ -273,4 +373,63 @@ function showLoader(msg) {
 function hideLoader() {
     const l = document.querySelector("#trlLoader");
     if(l) l.style.display = "none";
+}
+
+// === Modern notification system ===
+function showNotification(message, type = 'success', duration = 3000) {
+  const notification = document.createElement('div');
+  notification.style = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#667eea'};
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    z-index: 10001;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    animation: notificationSlideIn 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 400px;
+  `;
+  
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+  notification.innerHTML = `
+    <span style="font-size: 16px;">${icon}</span>
+    <span>${message}</span>
+  `;
+  
+  // Add notification styles if not already present
+  if (!document.querySelector('#notificationStyles')) {
+    const style = document.createElement("style");
+    style.id = 'notificationStyles';
+    style.textContent = `
+      @keyframes notificationSlideIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      @keyframes notificationSlideOut {
+        from { opacity: 1; transform: translateX(-50%) translateY(0); }
+        to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'notificationSlideOut 0.3s ease-out forwards';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 300);
+  }, duration);
 } 
