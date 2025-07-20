@@ -1,0 +1,217 @@
+ Tecnologia Crítica Componente (TCC)
+refere-se a uma tecnologia nova, ou disruptiva, essencial para o cumprimento dos requisitos de um SMEM que se queira desenvolver, onde não há domínio nacional de seu processo de desenvolvimento e produção, inclusive de seus insumos, e sua importação está sujeita a cerceamento tecnológico e riscos de P&D.
+
+ Ambiente laboratorial
+Ambiente controlado que permite testar funções críticas e avaliar o desempenho de uma determinada tecnologia, subsistema ou componente.
+
+ Ambiente operacional
+Ambiente real que permite à avaliação de alguns ou todos os requisitos operacionais especificados para a avaliação de um produto.
+
+ Ambiente relevante
+Ambiente de teste que incorpora aspectos de um ambiente controlado e de um ambiente real, permitindo a simulação de funções críticas e não-críticas de um modelo de engenharia ou demonstrador de tecnologia.
+
+ Aplicação Genérica
+Produto ou Sistema que pode utilizar a Tecnologia Crítica considerada e difere do Produto Alvo. Além disso, não possui necessariamente Requisitos de Usuário estabelecidos.
+
+ Componente
+Elemento mais básico pertencente a um subsistema, modelo de engenharia, ou prova de conceito.
+
+ Demonstrador de tecnologia
+Subsistema ou sistema que representa uma tecnologia crítica. Pode ser visto como uma evolução de um modelo de engenharia e é utilizado para demonstrar sua viabilidade técnica em ambiente operacional, de forma a se verificar algumas especificações técnicas e requisitos operacionais do produto alvo. Ex: circuito eletrônico de transmissão e recepção de dados encapsulado, a fim de permitir a portabilidade, obedecendo requisitos operacionais e técnicos prévios de performance, dimensões e peso.
+
+ Documentação Científica
+documento contendo um texto científico destinado a discutir fenômenos ainda não totalmente compreendidos. Pode ser publicado em revistas, anais, congressos etc.
+
+ Funções Críticas
+Principais funções da Tecnologia Crítica avaliada. São as principais funcionalidades a serem testadas para cada nível de prontidão tecnológica. A quantidade de funcionalidades críticas aumenta a medida que os níveis de prontidão vão sendo alcançados. Desse modo, cada nível TRL (do 4 ao 7) possui um conjunto de funções críticas predefinidas que precisam ser testadas com sucesso para que se atinja o referido nível.
+
+ Função crítica de ambiente laboratorial
+são as funções críticas de uma prova de conceito a serem testadas em ambiente laboratorial, e que devem ser definidas para o atingimento do TRL 4. Ex: circuito eletrônico de transmissão e recepção de dados, montado em protoboard sendo alimentado por fonte de alimentação externa e algoritmo de processamento instalado em computador de mesa. Esta prova de conceito possui a função crítica de transmitir e receber dados criptografados. Pode ser testada em laboratório sem necessidade de avaliar distância e velocidade de transmissão.
+
+ Função crítica de ambiente relevante
+são as funções críticas que devem ser testadas em ambiente relevante.
+
+Em se tratando de um modelo de engenharia, essas funções críticas devem incluir além daquelas especificadas em TRL 4, outras funções que representem ainda mais do sistema real para o atingimento do TRL 5.
+Exemplo: circuito eletrônico de transmissão e recepção de dados montado em placa de circuito impresso com fonte de alimentação integrada, e antena de potência, e algoritmo de processamento instalado em FPGA. Este modelo de engenharia possui a função crítica de transmitir e receber dados criptografados a uma distância e velocidade específica. Pode ser testada em campo aberto de forma a avaliar não só a capacidade de transmissão, mas também sua distância e velocidade.
+
+Em se tratando de um demonstrador de tecnologia, essas funções críticas devem incluir além daquelas especificadas em TRL 4 e 5, as relacionadas com performance, peso e dimensões, definindo-se assim um novo conjunto de funções críticas para o atingimento do TRL 6.
+Exemplo: circuito eletrônico de transmissão e recepção de dados encapsulado a fim de permitir a portabilidade, obedecendo requisitos prévios de performance, dimensões e peso. Este demonstrador de tecnologia possui as funções críticas de transmitir e receber dados criptografados a uma distância e velocidade específica e ser integrável em um dispositivo de comunicação portátil. Deve ser testado em ambiente relevante de forma a avaliar sua performance quanto a distância, velocidade e capacidade de transmissão, além de possuir dimensões e peso viáveis de ser integrado em um dispositivo de comunicação que seja portátil.
+
+ Função crítica de ambiente operacional
+são as funções críticas de um demonstrador de tecnologia a serem testadas em ambiente operacional quando integrado ao produto alvo, e que devem ser definidas para o atingimento do TRL 7. Além das funções críticas testadas em TRL 6 também devem ser consideradas outras funções críticas do demonstrador de tecnologia que só são possíveis de serem testadas quando este é integrado ao produto alvo. Ex: circuito eletrônico de transmissão e recepção de dados integrado a um dispositivo de comunicação portátil. Este demonstrador de tecnologia quando integrado a um dispositivo de comunicação portátil, deve possuir as mesmas funções críticas de TRL 6, ou seja, transmitir e receber dados criptografados a uma distância e velocidade específica e possuir dimensões compatíveis com a portabilidade do dispositivo de comunicação ao qual ele será integrado. Além disso, sua performance de transmissão deve ser compatível com a capacidade de processamento do dispositivo de comunicação.
+
+ Modelo de engenharia
+Arranjo de componentes integrados que fornece uma representação de um sistema/subsistema e que pode ser usado para determinar a viabilidade de uma prova de conceito. Pode ser visto como uma evolução de uma prova de conceito, onde os componentes e equipamentos de laboratório são substituídos por modelos próximo do subsistema real para que possam ser testados em ambiente relevante. Ex: circuito eletrônico de transmissão e recepção de dados montado em placa de circuito impresso com fonte de alimentação integrada, antena de alta potência, e algoritmo de processamento instalado em FPGA.
+
+ Objeto
+se refere a uma tecnologia crítica, mas pode ser representado por um sistema, subsistema ou componente (hardware ou software) que, inserido em uma estrutura hierárquica, integra um sistema ou produto (produto alvo), ou aplicação genérica.
+
+ Pesquisa Aplicada
+a pesquisa aplicada com o objetivo de desenvolver tecnologias ou técnicas para intervir e alterar fenômenos naturais ou sociais. Pode ser apoiada em pesquisa básica.
+
+ Pesquisa Básica
+Também chamada pesquisa pura ou pesquisa fundamental, trata-se de pesquisa cujo objetivo é o avanço de teorias científicas visando a predição ou compreensão de fenômenos naturais ou sociais. Possui natureza meramente teórica que intenciona ampliar a compreensão de fenômenos ou comportamentos sem, no entanto, procurar resolver ou tratar eventuais problemas associados a tais fenômenos.
+
+ Produto Alvo
+Produto ou SMEM que se deseja desenvolver que possui requisitos de usuário definidos, ou a definir.
+
+ Propriedade Intelectual
+Compreende as patentes, marcas, desenhos industriais, indicações geográficas, etc.
+
+ Protótipo
+modelo ou implementação preliminar de um SMEM (Produto Alvo) usado para avaliar sua arquitetura, seu desenho, sua performance, seu potencial de produção e sua documentação dos requisitos ou obter um melhor entendimento sobre tal produto.
+
+ Lote Piloto
+Produção experimental ou preliminar de um Sistema, em quantidade relativamente reduzida, tendo por finalidade adequar o protótipo e o projeto de engenharia e testar a respectiva linha de produção.
+
+ Prova de conceito
+Arranjo de componentes integrados que objetiva validar um conceito científico ou as principais funções de uma tecnologia (funções críticas). Normalmente este arranjo é integrado com equipamentos e componentes de laboratório e componentes de “prateleira”. Ex: circuito eletrônico de transmissão e recepção de dados, montado em protoboard sendo alimentado por fonte de alimentação externa e algoritmo de processamento instalado em computador de mesa.
+
+ Requisitos Operacionais (RO)
+documento que apresenta o que o usuário requer ao empregar um SMEM em ambiente operacional, a fim de cumprir as missões críticas nos possíveis cenários de emprego. Os parâmetros definidos nos RO são restritos a aspectos operacionais, consideradas as condições doutrinárias e operacionais e os parâmetros de desempenho contidos nas CONDOP do SMEM.
+
+ Requisitos Técnicos (RT)
+documento que especifica as características técnicas que o SMEM deverá possuir para atender aos requisitos operacionais estabelecidos. Define as funções, o comportamento (estado e modos de funcionamento), as métricas de desempenho, os requisitos de interface com outros sistemas, os requisitos ambientais, os requisitos físicos, os requisitos de uso de recursos externos e outras qualidades tais como confiabilidade, manutenibilidade, disponibilidade, interoperabilidade, segurança e treinamento.
+
+ Requisitos Operacionais (RO) Preliminares
+Requisitos que descrevem apenas as principais funcionalidades operacionais da aplicação (ou aplicações) que tem relação com a tecnologia avaliada. Estes requisitos são idealmente elaborados em TRL 4 e 5 e podem ser elaborados pela própria equipe de desenvolvimento caso possuam conhecimento básico das necessidades do usuário, ou estas podem ser extraídas de normas técnicas. Ex. para a Tecnologia Crítica “módulo de recepção e transmissão de dados”, um RO preliminar para as aplicações “rádio definido por software veicular” ou “rádio definido por software portátil” seria: “o rádio deve transmitir e receber dados de texto, áudio e vídeo, mantendo um enlace de, no mínimo, 20km e em visada direta”.
+
+ Requisitos Técnicos (RT) Preliminares
+Requisitos que descrevem apenas as principais funcionalidades técnicas da aplicação (ou aplicações) que tem relação com a tecnologia avaliada e suas funções críticas de ambiente laboratorial. Estes requisitos são idealmente elaborados em TRL 4 e 5 e podem ser elaborados pela própria equipe de desenvolvimento caso possuam conhecimento básico das necessidades do usuário, ou estas podem ser extraídas de normas técnicas. Ex. para a Tecnologia Crítica “módulo de recepção e transmissão de dados”, um RT preliminar para as aplicações “rádio definido por software veicular” ou “rádio definido por software portátil” seria: O rádio deve transmitir e receber dados, garantindo a transferência de 300 (trezentos) kB em no máximo três minutos quando em visada direta numa faixa entre 20 a 40km.
+
+ Sistemas de Produtos Complexos (CoPS)
+bens de capital, sistemas, redes, unidades de controle, pacotes de software, construções e serviços específicos, de alto custo e alta tecnologia (Hobday, 1998).
+
+ Subsistema
+Arranjo de componentes integrados que realiza uma determinada função dentro de um sistema.
+
+ Tecnologia crítica
+Tecnologia crítica é uma tecnologia nova, ou disruptiva, essencial para o cumprimento dos requisitos de um SMEM que se queira desenvolver, onde não há domínio nacional de seu processo de desenvolvimento e produção, inclusive de seus insumos, e sua importação está sujeita a cerceamento tecnológico e riscos de P&D.
+
+Avaliação CRITICIDADE:
+ Relevância
+Refere-se ao grau de importância e significado de uma tecnologia, produto ou solução em relação a um objetivo ou necessidade específica, especialmente no contexto de defesa e segurança. A relevância é determinada por fatores como exclusividade (unicidade ou raridade da tecnologia), essencialidade (vitalidade ou indispensabilidade para atender a um propósito específico) e potenciais vulnerabilidades (riscos associados à tecnologia, particularmente quando desenvolvida ou fornecida por entidades estrangeiras). No domínio da defesa, uma tecnologia relevante pode proporcionar vantagens estratégicas, capacidades operacionais superiores ou garantir a integridade e segurança de operações.
+
+ Exclusividade Tecnológica
+Refere-se ao grau em que uma determinada tecnologia, produto ou solução é único ou raro, possuindo características, funcionalidades ou desempenho que a distinguem significativamente de outras soluções existentes.
+
+ Essencialidade
+Refere-se ao grau em que uma tecnologia, produto ou solução é vital ou indispensável para atender a objetivos específicos ou para a operacionalização de um determinado sistema ou produto alvo. Uma tecnologia considerada essencial é aquela sem a qual o sistema ou produto não funcionaria adequadamente ou não atenderia aos padrões e requisitos estabelecidos. A essencialidade pode ser determinada por fatores como singularidade, desempenho superior, falta de alternativas comparáveis ou a capacidade da tecnologia de atender a requisitos absolutos.
+
+ Tecnologia Habilitadora
+No contexto da exclusividade tecnológica, uma tecnologia habilitadora desempenha um papel crucial ao possibilitar avanços que não seriam viáveis com as tecnologias existentes. Ela pode estabelecer novos padrões, direcionar a evolução tecnológica em direções específicas e, em muitos casos, transformar setores inteiros, oferecendo uma vantagem estratégica e competitiva.
+
+ Vulnerabilidade
+No contexto de sistemas de defesa, uma vulnerabilidade refere-se a qualquer falha, deficiência ou design intencional que possa ser explorado para comprometer a integridade, disponibilidade ou confidencialidade de um sistema. Estas falhas podem ser resultado de erros não intencionais, limitações tecnológicas, compromissos de design (vulnerabilidades técnicas) ou podem ser introduzidas intencionalmente por razões maliciosas ou agendas específicas, muitas vezes ocultas ou indetectáveis (vulnerabilidades táticas). A exploração de tais vulnerabilidades pode levar a ações maliciosas, como acesso não autorizado, espionagem ou sabotagem, afetando gravemente a confiança e segurança de um sistema.
+
+ Vulnerabilidade Técnica
+Refere-se a falhas, limitações ou deficiências inerentes ao design, implementação ou operação de um sistema. Estas vulnerabilidades não são intencionalmente inseridas, mas podem existir devido a erros não intencionais, limitações tecnológicas ou compromissos de design. Podem ser exploradas por atores mal-intencionados que compreendem a tecnologia e suas limitações, comprometendo a integridade, disponibilidade ou confidencialidade dos dados e operações do sistema. Exemplos: Susceptibilidade a interferências eletromagnéticas; Falta de criptografia ou uso de algoritmos de criptografia fracos; Erros de software que podem levar a travamentos ou comportamento imprevisível; Design de hardware que pode ser vulnerável a ataques físicos, como side-channel attacks, etc.
+
+ Vulnerabilidade Tática
+Refere-se à possibilidade de uma vulnerabilidade ser introduzida intencionalmente em um sistema, muitas vezes por razões maliciosas ou para servir a uma agenda específica. Elas são projetadas para serem ocultas ou indetectáveis sob inspeção normal. Pode ser ativada ou explorada por atores com conhecimento da vulnerabilidade, muitas vezes resultando em acesso não autorizado, espionagem, sabotagem ou outras ações maliciosas, comprometendo gravemente a confiança na integridade e segurança de um sistema. Exemplos: Backdoors que permitem acesso não autorizado; Spyware ou funções de coleta de dados ocultas; Mecanismos de desativação ou sabotagem remota; Funcionalidades que permitem o bypass de autenticações ou controles de segurança, etc.
+
+ Acessibilidade
+Refere-se à extensão em que uma tecnologia, produto ou solução específica pode ser adquirida, seja a partir de fontes nacionais ou internacionais. Esta disponibilidade é influenciada por diversos fatores, incluindo a presença e capacidade de fornecedores nacionais, políticas de exportação de países estrangeiros, regulamentações internacionais e relações diplomáticas. No contexto de defesa, a acessibilidade é crucial para determinar a dependência de uma nação em relação a tecnologias externas e sua capacidade de responder a necessidades emergentes sem restrições. Uma alta acessibilidade indica autonomia e flexibilidade, enquanto uma baixa acessibilidade pode sinalizar vulnerabilidades e dependências significativas.
+
+ Indisponibilidade
+refere-se à dificuldade ou impossibilidade de adquirir ou acessar a Tecnologia Crítica em análise de fornecedores nacionais ou internacionais. Esta indisponibilidade pode ser causada por diversos fatores, incluindo, mas não se limitando a: Oferta Nacional e internacional e Natureza Bélica..
+
+ Disponibilidade
+Refere-se à facilidade e viabilidade com que uma tecnologia, produto ou solução específica pode ser adquirida ou acessada. Esta disponibilidade é influenciada tanto por fatores internos quanto externos. Internamente, considera-se o número e capacidade de fornecedores nacionais, bem como a presença de infraestruturas e know-how para desenvolvimento ou produção local. Externamente, a disponibilidade é afetada por restrições, regulamentações ou políticas de exportação de países estrangeiros, especialmente quando se trata de tecnologias sensíveis ou estratégicas. Uma baixa disponibilidade pode indicar dependência ou vulnerabilidades significativas, especialmente se a tecnologia é essencial, exclusiva e tem poucas alternativas viáveis. Por outro lado, uma alta disponibilidade sugere autonomia, flexibilidade e resiliência na aquisição e integração da tecnologia em questão.
+
+ Capacidade Nacional
+Refere-se à habilidade e competência existentes dentro de um país para desenvolver, produzir ou fornecer uma tecnologia, produto ou solução específica. Esta capacidade é determinada pela presença, diversidade e competência de fornecedores nacionais, bem como pela infraestrutura, know-how e recursos humanos disponíveis para pesquisa, desenvolvimento e produção local. No domínio da defesa, a capacidade nacional é um indicador da autossuficiência e resiliência de um país em relação à produção e integração de tecnologias críticas, minimizando a dependência de fontes estrangeiras e reforçando a posição estratégica e a segurança nacional.
+
+ Disponibilidade Nacional
+Refere-se à facilidade e viabilidade com que uma tecnologia, produto ou solução específica pode ser adquirida ou acessada dentro do território nacional. Esta disponibilidade é determinada pela presença, capacidade e diversidade de fornecedores nacionais, bem como pela infraestrutura e know-how existentes no país para o desenvolvimento ou produção local. Uma alta disponibilidade nacional sugere autonomia, resiliência e capacidade de resposta rápida a necessidades emergentes, minimizando dependências externas.
+
+ Disponibilidade Internacional
+Refere-se à facilidade e viabilidade com que uma tecnologia, produto ou solução específica pode ser adquirida ou acessada de fornecedores ou fontes estrangeiras. Esta disponibilidade é influenciada por diversos fatores, incluindo relações diplomáticas, políticas de exportação do país fornecedor, regulamentações internacionais e regimes de controle de exportação, especialmente quando se trata de tecnologias sensíveis. Uma baixa disponibilidade internacional pode indicar potenciais riscos ou vulnerabilidades em caso de conflitos, sanções ou restrições comerciais, enquanto uma alta disponibilidade pode indicar uma ampla gama de opções e flexibilidade na aquisição de tecnologias.
+
+ Oferta Internacional
+Pode ser definida como a medida em que uma nação se apoia em fontes estrangeiras para obter tecnologias, produtos ou soluções específicas que são críticos para seus interesses estratégicos, operações ou segurança nacional. Esta dependência está diretamente relacionada à disponibilidade internacional. Uma alta disponibilidade internacional de tecnologia fornece a um país várias opções de fornecimento externo, enquanto uma baixa disponibilidade limita as fontes de fornecimento a poucos países, podendo levar a uma dependência vulnerável. Neste contexto, uma alta dependência internacional implica indiretamente em uma alta autonomia tecnológica, caso a Tecnologia Crítica em questão seja desenvolvida em território nacional.
+
+ Componentes Sensíveis
+São aqueles componentes que são produzidos especificamente para aplicações bélicas ou nucleares, ou são controlados por regimes internacionais de controle de artefatos bélicos (e.g. Tratado de Não-Proliferação Nuclear TNP, Regime de Controle de Tecnologias de Mísseis MTCR, e outros).
+
+ Conteúdo Nacional
+No domínio da defesa e tecnologia, CONTEÚDO NACIONAL refere-se à proporção ou ao conjunto de componentes específicos que são classificados como sensíveis — seja pela sua aplicação bélica, nuclear ou por estarem sujeitos a regimes internacionais de controle — e que são originários, produzidos ou desenvolvidos dentro do território nacional. Este conceito sublinha a capacidade e autonomia de um país em produzir e integrar componentes de alta importância e restrição sem depender de fontes estrangeiras. No contexto de defesa, o conteúdo nacional de componentes sensíveis é de vital importância, pois a proveniência e o controle sobre estes componentes podem ter implicações críticas na segurança, confiabilidade e integridade dos sistemas em que são implementados. Uma predominância de conteúdo nacional nesses componentes indica uma posição estratégica fortalecida, minimizando vulnerabilidades externas e potencializando a capacidade de autossuficiência e controle.
+
+ Natureza Bélica
+refere-se a Tecnologias Críticas desenvolvidas especificamente para fins militares ou de defesa. Estes itens são caracterizados por suas aplicações diretas em operações bélicas, missões militares ou sistemas de armamentos, ou por estarem sujeitos a regimes internacionais de controle de artefatos bélicos (e.g. Tratado de Não-Proliferação Nuclear TNP, Regime de Controle de Tecnologias de Mísseis MTCR, e outros )."
+
+Avaliação Alinhamento Estratégico:
+ Capacidades Militares
+Capacidades militares referem-se ao conjunto de habilidades, tecnologias, sistemas, recursos humanos e estratégicos que uma Força (Exército, Marinha, Força Aérea) possui para realizar suas missões e objetivos. Essas capacidades abrangem diversos aspectos, incluindo os tecnológicos, operacionais, logísticos, estratégicos, humanos, de comando e controle e interoperabilidade.
+
+ Pronta Resposta
+Capacidade de projetar força terrestre, aérea e marítima em operações de amplo espectro, em qualquer território ou área de interesse, com rapidez e eficiência. Associa-se à Mobilidade Estratégica, Suporte à Projeção de Força, Prontidão, Projeção Aérea, Projeção Naval. Exemplo de Sistemas: Aeronaves de transporte estratégico (ex: C-130 Hercules), navios de assalto anfíbio, veículos de desdobramento rápido, sistemas de comunicação por satélite, etc.
+
+ Suporte ao Enfrentamento
+Capacidade de garantir o sucesso em missões, empregando uma ampla gama de táticas e recursos para obter vantagem em relação ao oponente em terra, no ar e no mar. É associado ao Combate Individual, Operações Especiais, Ação Terrestre, Manobra Tática, Apoio de Fogo, Mobilidade e Contramobilidade, Superioridade Aérea e Espacial, Domínio Marítimo. Exemplo de sistemas: Caças de superioridade aérea (ex: Gripen), submarinos nucleares, sistemas de mísseis de cruzeiro, drones de ataque (ex: MQ-9 Reaper), sistemas de defesa costeira, carros de combate.
+
+ Apoio aos Órgãos Governamentais
+Capacidade de contribuir para a soberania nacional e o bem-estar social, cooperando em terra, no ar e no mar com órgãos governamentais. É associado a Proteção Integrada, Atribuições Subsidiárias, Emprego em Apoio à Política Externa, Operações Humanitárias, Vigilância e Reconhecimento Marítimo e Aéreo. Exemplos de sistemas: Navios hospital, aeronaves de patrulha marítima (ex: P-8 Poseidon), sistemas de comunicação de emergência, veículos blindados para controle de distúrbios, veículos de engenharia para construção e reparos em situações de desastre, armas não letais.
+
+ Comando e Controle
+Capacidade de exercer comando e controle eficazes em operações terrestres, aéreas e marítimas, por meio de planejamento e tomada de decisões informadas. É associado ao Planejamento e Condução, Sistemas de Comunicações, Consciência Situacional, Gestão do Conhecimento e das Informações, Operações de Comando e Controle Integrado. Exemplos de sistemas: Centros de operações móveis, sistemas de comando e controle embarcados, redes de comunicação segura, sistemas de comunicação por satélite, sistemas de inteligência e vigilância, sistemas de gerenciamento de batalha digital.
+
+ Sustentação Logística
+Capacidade de prover suporte logístico adequado para forças em operações terrestres, aéreas e marítimas. É associada ao Apoio Logístico Integrado, Infraestrutura Operacional, Gestão e Coordenação Logística, Suporte de Saúde, Gestão de Recursos. Exemplos de sistemas: Caminhões de transporte logístico, navios de reabastecimento e apoio, aeronaves de reabastecimento em voo (ex: KC-135 Stratotanker), hospitais de campanha, depósitos móveis de suprimentos, Manufatura aditiva de peças de reposição.
+
+ Interoperabilidade
+Capacidade de operar de maneira integrada com as demais forças armadas e em ambiente interagências, em operações conjuntas ou multinacionais. É associada à Interoperabilidade Conjunta, Combinada, Interagência, Operações Conjuntas Terrestres, Aéreas e Marítimas. Exemplos de sistemas: veículos híbridos, sistemas de gerenciamento de batalha integrados, plataformas e simuladores de treinamento conjunto, Sistemas de comunicação via satélite, sistemas de identificação amigo ou inimigo (IFF), softwares de planejamento, padronização em sistemas de comunicação.
+
+ Proteção
+Capacidade de proteger pessoal, material e informações contra ameaças terrestres, aéreas e marítimas. É associada à Proteção ao Pessoal, Proteção Física, Segurança das Informações, Defesa Antiaérea, Defesa Naval e Antissubmarino, e Defesa Espacial. Exemplos de sistemas: Sistemas de defesa antiaérea móvel (ex: S-400), veículos de guerra eletrônica, sistemas de sonar para detecção de submarinos, equipamentos de proteção NBC (Nuclear, Biológico e Químico), sistemas de guerra anti-submarina, equipamentos de proteção individual, sistemas optrônicos satelitais.
+
+ Superioridade da Informação
+Capacidade de obter vantagem operativa por meio da coleta, processamento e proteção de grandes volumes de informações em operações terrestres, aéreas, marítimas e espaciais. É associada à Guerra Eletrônica, Operações de Apoio à Informação, Inteligência, Vigilância e Reconhecimento Aéreo e Marítimo. Exemplos de sistemas: Satélites de reconhecimento, sistemas de inteligência eletrônica, Softwares de análise de dados de inteligência, sistemas de radar de longo alcance, Sistemas optrônicos de longo alcance, rádios táticos seguros.
+
+ Cibernética
+Capacidade de realizar ações cibernéticas para superar sistemas adversários e defender os próprios sistemas, aplicável em operações terrestres, aéreas e marítimas. É associada à Exploração Cibernética, Proteção Cibernética, Ataque Cibernético, Segurança de Redes de Comunicação, Segurança Espacial. Exemplos de sistemas: Sistemas de guerra cibernética ofensiva e defensiva, redes de computadores seguras, ferramentas de criptografia e segurança de dados, centros de operações de rede, capacidades de resposta a incidentes cibernéticos.
+
+ Setores Civis
+Setores Industriais Civis prioritários (Fundo Setorial).
+
+ Setor Aeronáutico
+Foco na indústria aeronáutica civil, com desenvolvimento de sistemas de aviação como tecnologias inovadoras para a aviação e engenharia aeronáutica. Abrange uma ampla gama de áreas focadas na melhoria da segurança aérea, eficiência operacional, e sustentabilidade ambiental. Exemplos de sistemas: Sistemas Avançados de Navegação e Controle de Tráfego Aéreo, Novos materiais e design aerodinâmicos, Sistemas de manutenção preditiva, biocombustíveis e propulsão alternativa, simuladores e sistemas de gestão de aeroportos.
+
+ Setor do Agronegócio
+Foco nas áreas de agronomia, veterinária, biotecnologia, economia e sociologia agrícola. Promove a atualização tecnológica da indústria agropecuária, introduzindo novas variedades para reduzir doenças do rebanho e aumentar a competitividade do setor. Também estimula investimentos na área de biotecnologia agrícola tropical e em novas tecnologias. Exemplos de sistemas: Sistemas de Informação Geográfica (SIG), Agricultura de precisão, Irrigação inteligente, Robótica e Automação, Softwares de Gestão Agrícola, biotecnologia, Sistemas de Monitoramento e Controle de Pragas.
+
+ Setor Amazônia
+Foco voltado no desenvolvimento da Região Amazônica. Pode incluir Sistemas de Monitoramento Ambiental, Plataformas de Dados Geográficos, Tecnologia de Sensoriamento Remoto, Sistemas de Informação para Gestão de Biodiversidade, Tecnologias de Informática Aplicadas ao Desenvolvimento Sustentável. Exemplos de sistemas: Sistemas de monitoramento ambiental, coleta e dados de sistemas geoespaciais, satélites e drones para sensoriamento remoto, catálogo e monitoramento de espécies e ecossistemas, geração de energia através de PCH.
+
+ Setor Aquaviário
+Foco no transporte aquaviário e construção naval. Inclui sistemas de monitoramento e gestão de operações portuárias, ferramentas para a segurança na atracação de navios, e plataformas para otimização da gestão portuária. Exemplos de sistemas: Central Móvel de Atracação para monitoramento da aproximação de embarcações, Sistema de Eficiência e Segurança para Operações Portuárias (Sesop), Sistema Integrado de Previsão e Segurança (SIPS) para análise das condições marítimas e meteorológicas.
+
+ Setor de Biotecnologia
+Focado na infraestrutura nacional de pesquisas e serviços de suporte à biotecnologia, expansão do conhecimento na área, no estímulo à formação de empresas de base biotecnológica, na realização de estudos de prospecção e monitoramento do avanço do conhecimento no setor. Exemplos de sistemas: Tecnologia de DNA Recombinante (Engenharia Genética), Cultura de Tecido Vegetal, Transgênicos (Organismos Geneticamente Modificados).
+
+ Setor de Energia
+Foco em programas e projetos na área de energia, especialmente na área de eficiência energética no uso final. Ênfase em desafios de longo prazo no setor, como fontes alternativas de energia com menores custos e melhor qualidade, redução do desperdício e aumento da competitividade da tecnologia industrial nacional. Exemplos de sistemas: Turbinas eólicas e solares para geração de energia renovável, sistemas inteligentes de rede (smart grids), baterias de alta capacidade, tecnologias de armazenamento de energia, sistemas de monitoramento e controle para otimização do consumo energético.
+
+ Setor Hídrico
+Foco no desenvolvimento de tecnologias e sistemas para otimizar a utilização e gestão dos recursos hídricos, visando eficiência econômica e minimização de impactos ambientais. Abrange avanços no uso da água em setores como agricultura e indústria, práticas de eficiência hídrica e tecnologias de reciclagem e reutilização de água. Exemplos de sistemas: gestão inteligente da distribuição de água, redes de monitoramento inteligentes, big data, inteligência artificial para aprimorar a distribuição e gestão de vazamentos.
+
+ Setor de Tecnologia da Informação
+Focado em estimular projetos estratégicos de pesquisa e desenvolvimento em tecnologia da informação. Visa incentivar empresas nacionais a desenvolver e produzir bens e serviços em informática e automação. A ênfase é investir em pesquisa científica e tecnológica, impulsionando o avanço tecnológico e a inovação no setor de TI do Brasil. Exemplos de sistemas: softwares avançados, sistemas de automação, soluções de TI para diversos setores da economia.
+
+ Setor de Infraestrutura
+Foco na modernização e ampliação da infraestrutura laboratorial e dos serviços de apoio à pesquisa em instituições públicas de ensino superior e de pesquisa no Brasil. Visa a criação e reforma de laboratórios e equipamentos, e outras ações para melhoria da infraestrutura de pesquisa. Exemplos de sistemas: sistemas de informação para gestão de dados, infraestrutura para computação de alto desempenho, equipamentos de análise e teste avançados, plataformas de colaboração virtual.
+
+ Setor Mineral
+Dedicado ao desenvolvimento e difusão de tecnologia, pesquisa científica, inovação, e formação de recursos humanos no setor mineral. Busca apoiar projetos que contribuam para o desenvolvimento científico e tecnológico nas cadeias produtivas de minerais estratégicos. Exemplos de sistemas: Tecnologias de avaliação de depósitos minerais, Tecnologias de Lavra, Processos de Cominuição e Flotação, Hidrometalurgia, Sistemas de Gestão Ambiental na Mineração, Reciclagem de Materiais Minerais.
+
+ Setor de Petróleo
+Especializado no estímulo à inovação na cadeia produtiva do setor de petróleo e gás natural, com foco na formação e qualificação de recursos humanos e no desenvolvimento de projetos em parceria entre empresas e instituições acadêmicas ou centros de pesquisa. Exemplos de sistemas: Robôs de inspeção, PIG inercial, Sistemas de Posicionamento Dinâmico (DP), Tecnologias de Imageamento Sísmico 3D e 4D, Software de Modelagem e Simulação de Reservatórios, Sistemas de Controle de Poço e Prevenção de Explosões (BOP).
+
+ Setor de Saúde
+Concentrado no desenvolvimento e na inovação tecnológica no Sistema Único de Saúde (SUS), englobando saúde pública, fármacos e biotecnologia. Objetivo de estimular o investimento privado em pesquisa e desenvolvimento e modernizar a indústria brasileira de equipamentos médico-hospitalares, além de disseminar tecnologias que expandam o acesso a serviços de saúde de qualidade. Exemplos de sistemas: monitoramento remoto de pacientes, telemedicina com IA, novos fármacos por engenharia genética, equipamentos médicos portáteis.
+
+ Setor de Transporte
+Dedicado ao desenvolvimento e pesquisa em Engenharia Civil e de Transportes, com foco em materiais, logística, equipamentos e softwares. Objetiva melhorar a qualidade, reduzir custos e aumentar a competitividade do transporte rodoviário de passageiros e de carga no Brasil. Exemplos de sistemas: novos materiais compósitos, sistemas avançados de logística, softwares de gestão de frota com IA, tecnologias para infraestrutura de estradas.
+
+ Setor Espacial
+Focado em programas e projetos no setor espacial, expandindo as iniciativas do Programa Nacional de Atividades Espaciais (PNAE). Visa remover barreiras para o desenvolvimento do setor espacial brasileiro, com ênfase em satélites e veículos lançadores. Exemplos de sistemas: Satélites Avançados, veículos lançadores de satélites, tecnologias de propulsão inovadoras, Sistemas Inerciais, Sensores optronicos de longo alcance.
