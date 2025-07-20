@@ -1,5 +1,4 @@
 # Backend
-/backend/data
 /backend/store
 /backend/uploads
 /backend/sessions.json
