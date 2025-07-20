@@ -104,8 +104,11 @@ function hideLoader(){
               <div style="font-size:16px;font-weight:500;color:#374151;margin-bottom:8px;">
                 Arraste e solte seus arquivos aqui
               </div>
-              <div style="font-size:14px;color:#6b7280;margin-bottom:16px;">
+              <div style="font-size:14px;color:#6b7280;margin-bottom:8px;">
                 ou clique para selecionar
+              </div>
+              <div style="font-size:12px;color:#ef4444;margin-bottom:16px;">
+                ⚠️ Não use espaços ou acentos no nome do arquivo
               </div>
               <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" 
                   style="display:none;" />
