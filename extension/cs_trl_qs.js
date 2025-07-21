@@ -90,16 +90,30 @@ async function processTRLQuestion(question) {
         
         showLoader("Consultando IA...");
         
-        // Build the question with context
-        const questionContext = `Esta é uma pergunta sobre o nível TRL${trlLevel}. 
+        // ========================================
+        // UI-CONTEXT FORMATTING ONLY  
+        // ========================================
+        // Frontend provides clean TRL-specific context - backend applies all prompting techniques
+        
+        const questionContext = `**Avaliação de Critério TRL${trlLevel}:**
 
-Responda de forma estruturada:
-1. ${questionText}? (sim/não)
-Se sim: 
-    2. ${commentLabel}?
-    3. Quantifique a realização dessa atividade (0 - 100).
-Se não:
-    2. Se não, explique brevemente por quê.`;
+${questionText}?
+
+**Formato de Resposta Requerido:**
+
+1. **Resposta Principal:** [SIM/NÃO]
+
+**Se SIM:**
+   2. **${commentLabel}:** [Forneça explicação detalhada]
+   3. **Nível de Completude:** [0% | 50% | 100%] com justificativa
+      - 0%: Apenas planejado ou iniciado, sem resultados concretos
+      - 50%: Parcialmente implementado ou em desenvolvimento ativo
+      - 100%: Completamente implementado e validado
+
+**Se NÃO:**
+   2. **Justificativa:** [Explique por que o critério não é atendido]
+
+**Contexto:** Esta avaliação refere-se especificamente aos critérios e requisitos do Technology Readiness Level ${trlLevel}.`;
 
         // Log the prompt to console
         console.log("=== TRL Question Prompt ===");

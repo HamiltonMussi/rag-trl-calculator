@@ -709,15 +709,19 @@ function showNotification(message, type = 'success', duration = 3000) {
       return {value:r.value, text:label};
     });
   
-    const questionContext = `Analise a seguinte pergunta e suas alternativas:
+    // ========================================
+    // UI-CONTEXT FORMATTING ONLY
+    // ========================================
+    // Frontend handles clean question formatting - backend applies all prompting techniques
+    
+    const questionContext = `**Pergunta de Múltipla Escolha sobre TRL:**
 
 ${question}
 
-Alternativas:
-${opts.map(o=>`${o.value}) ${o.text}`).join("\n")}
+**Alternativas disponíveis:**
+${opts.map((o, index) => `${o.value}) ${o.text}`).join('\n')}
 
-Responda de forma concisa qual alternativa está correta e por quê. 
-Se múltiplas alternativas estiverem corretas, indique a última que estiver correta.`;
+**Instrução:** Selecione e justifique a alternativa mais adequada com base nos critérios TRL. Se múltiplas alternativas estiverem tecnicamente corretas, selecione a última (mais avançada) da lista.`;
 
     // Log the prompt to console
     console.log("=== General Question Prompt ===");
