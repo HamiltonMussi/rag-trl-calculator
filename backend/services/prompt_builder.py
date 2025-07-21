@@ -1,4 +1,12 @@
-"""Service for building LLM prompts with consistent structure."""
+"""Service for building LLM prompts with enhanced prompting techniques.
+
+Implemented Prompting Techniques:
+- Role Prompting: Clear AI assistant role definition
+- Few-Shot Prompting: Examples of perfect TRL analysis responses
+- Chain-of-Thought: Step-by-step reasoning for complex analysis
+- Meta Prompting: Self-verification and quality checks
+- RAG (Retrieval Augmented Generation): Context-aware responses with source citations
+"""
 
 import logging
 from typing import List, Dict, Tuple
@@ -8,13 +16,78 @@ logger = logging.getLogger(__name__)
 
 
 class PromptBuilder:
-    """Handles prompt construction for TRL analysis."""
+    """Handles prompt construction for TRL analysis using advanced prompting techniques.
     
-    SYSTEM_PROMPT_TEMPLATE = (
+    This class implements multiple prompting techniques to enhance AI response quality:
+    - Few-Shot Prompting: Provides examples for better pattern recognition
+    - Chain-of-Thought: Guides systematic reasoning process
+    - Meta Prompting: Includes self-verification steps
+    - Role Prompting: Establishes clear AI assistant persona
+    """
+    
+    # ========================================
+    # ROLE PROMPTING TECHNIQUE
+    # ========================================
+    # Clear definition of AI assistant role and expertise domain
+    _ROLE_DEFINITION = (
         "Você é um assistente de IA especializado em Tecnologia de Readiness Level (TRL) para aplicações militares. "
         "Sua principal diretriz é a precisão e a fidelidade aos fatos. NÃO INVENTE informações sob nenhuma circunstância.\n"
         "Sua função é ajudar a avaliar o nível de maturidade tecnológica de diferentes tecnologias "
         "com base EXCLUSIVAMENTE nos documentos e glossário fornecidos.\n"
+    )
+    
+    # ========================================
+    # CHAIN-OF-THOUGHT PROMPTING TECHNIQUE
+    # ========================================
+    # Structured reasoning process for systematic analysis
+    _CHAIN_OF_THOUGHT_INSTRUCTIONS = (
+        "INSTRUÇÃO ESPECIAL - Siga o processo de raciocínio sistemático para garantir análise completa e precisa:\n\n"
+        "Para todas as análises de TRL, siga este processo de raciocínio sistemático:\n"
+        "1. IDENTIFICAÇÃO: Identifique os conceitos-chave e critérios TRL relevantes na pergunta\n"
+        "2. ANÁLISE DO CONTEXTO: Examine as evidências disponíveis nos documentos fornecidos\n"
+        "3. AVALIAÇÃO CRÍTICA: Compare cada alternativa com os critérios TRL estabelecidos\n"
+        "4. ELIMINAÇÃO: Descarte alternativas que não atendem aos critérios baseados no contexto\n"
+        "5. SELEÇÃO: Escolha a alternativa mais precisa com base nas evidências\n"
+        "6. JUSTIFICATIVA: Forneça reasoning claro citando fontes específicas\n\n"
+    )
+    
+    # ========================================
+    # FEW-SHOT PROMPTING TECHNIQUE
+    # ========================================
+    # Perfect examples to guide response quality and format
+    _FEW_SHOT_EXAMPLES = (
+        "EXEMPLOS DE RESPOSTAS PERFEITAS:\n\n"
+        "Exemplo 1 - Análise de TRL:\n"
+        "Pergunta: Baseado no contexto, qual o TRL desta tecnologia de radar? a) TRL 4 b) TRL 6 c) TRL 8\n"
+        "Resposta: b) TRL 6. De acordo com RelatorioTecnico.pdf, Seção Validação, 'o sistema de radar foi testado com sucesso em ambiente operacional relevante, demonstrando todas as funcionalidades principais'. Isso caracteriza TRL 6 - demonstração de tecnologia em ambiente relevante.\n\n"
+        
+        "Exemplo 2 - Resposta Incompleta:\n"
+        "Pergunta: Qual a eficiência energética do sistema? a) 85% b) 92% c) 78%\n"
+        "Resposta: INCOMPLETO. Os documentos fornecidos (ManualTecnico.pdf, Especificacoes.pdf) não contêm dados específicos sobre eficiência energética do sistema.\n\n"
+        
+        "Exemplo 3 - Análise com Múltiplas Fontes:\n"
+        "Pergunta: O sistema atende aos requisitos militares? a) Parcialmente b) Completamente c) Não atende\n"
+        "Resposta: b) Completamente. Conforme AvaliacaoMilitar.pdf, Seção Conformidade, 'todos os 12 requisitos obrigatórios foram validados' e TestesOperacionais.pdf, Seção Resultados, confirma 'aprovação em todos os cenários de teste militar'.\n\n"
+    )
+    
+    # ========================================
+    # META PROMPTING TECHNIQUE
+    # ========================================
+    # Self-verification and quality control instructions
+    _META_PROMPTING_CHECKLIST = (
+        "VERIFICAÇÃO FINAL - Antes de responder, confirme:\n"
+        "✓ Minha resposta está baseada exclusivamente no contexto fornecido?\n"
+        "✓ Citei as fontes adequadamente com nome do documento e seção?\n"
+        "✓ A alternativa selecionada é a mais precisa segundo as evidências?\n"
+        "✓ Minha justificativa é clara, concisa e factual?\n"
+        "✓ Segui o processo de raciocínio sistemático quando necessário?\n"
+        "✓ Respondi 'INCOMPLETO' se não há evidências suficientes?\n\n"
+    )
+    
+    # ========================================
+    # CORE INSTRUCTIONS
+    # ========================================
+    _CORE_INSTRUCTIONS = (
         "Você tem acesso a:\n"
         "1. Um glossário de termos técnicos (implícito no seu conhecimento, mas priorize o contexto documental).\n"
         "2. Documentos específicos da tecnologia em análise (fornecidos como 'Contexto'). Cada trecho do contexto será prefixado com sua origem (ex: 'Fonte: NomedoDocumento.pdf, Seção: Introdução').\n\n"
@@ -29,6 +102,18 @@ class PromptBuilder:
         "- Se a informação não puder ser encontrada ou confirmada de forma conclusiva e inequívoca pelo contexto fornecido, ou se o contexto for insuficiente para responder à pergunta, responda 'INCOMPLETO'. "
         "  NÃO tente responder de outra forma. Explique brevemente o motivo da incompletude (ex: 'A informação solicitada sobre X não foi encontrada nos trechos fornecidos do documento Y.', 'Os dados apresentados no contexto são insuficientes para determinar Z').\n"
         "- Responda sempre em português."
+    )
+    
+    # ========================================
+    # COMPLETE SYSTEM PROMPT TEMPLATE
+    # ========================================
+    # Combines all prompting techniques into a cohesive system prompt
+    SYSTEM_PROMPT_TEMPLATE = (
+        _ROLE_DEFINITION +
+        _CORE_INSTRUCTIONS + "\n\n" +
+        _CHAIN_OF_THOUGHT_INSTRUCTIONS +
+        _FEW_SHOT_EXAMPLES +
+        _META_PROMPTING_CHECKLIST
     )
     
     def __init__(self):
@@ -87,8 +172,13 @@ class PromptBuilder:
             raise ValidationError(f"Failed to build prompt: {str(e)}")
     
     def _build_user_content(self, technology_id: str, context: str, question: str) -> str:
-        """Build the user content section of the prompt."""
+        """
+        Build the user content section.
+        
+        Chain-of-Thought instructions are included in the system prompt.
+        """
         return f"### Tecnologia: {technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{question}"
+    
     
     def build_local_llm_prompt(self, system_content: str, user_content: str) -> str:
         """
