@@ -721,6 +721,15 @@ ${question}
 **Alternativas disponíveis:**
 ${opts.map((o, index) => `${o.value}) ${o.text}`).join('\n')}
 
+**Formato de Resposta Requerido:**
+
+**Se há informações suficientes:**
+1. **Resposta:** [Letra da alternativa correta]
+2. **Justificativa:** [Explicação detalhada baseada nos documentos, citando fontes específicas]
+
+**Se não há informações suficientes:**
+1. **Resposta:** DESCONHECIDO - Não há informações suficientes nos documentos fornecidos para responder esta pergunta.
+
 **Instrução:** Selecione e justifique a alternativa mais adequada com base nos critérios TRL. Se múltiplas alternativas estiverem tecnicamente corretas, selecione a última (mais avançada) da lista.`;
 
     // Log the prompt to console
@@ -790,7 +799,7 @@ ${opts.map((o, index) => `${o.value}) ${o.text}`).join('\n')}
     console.log("Setting up question observer...");
     
     // Create a MutationObserver to watch for changes in the DOM
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         console.log("DOM mutation detected");
         
         // Check if any of the question divs became visible

@@ -101,7 +101,7 @@ ${questionText}?
 
 **Formato de Resposta Requerido:**
 
-1. **Resposta Principal:** [SIM/NÃO]
+1. **Resposta Principal:** [SIM/NÃO/DESCONHECIDO]
 
 **Se SIM:**
    2. **${commentLabel}:** [Forneça explicação detalhada]
@@ -112,6 +112,9 @@ ${questionText}?
 
 **Se NÃO:**
    2. **Justificativa:** [Explique por que o critério não é atendido]
+
+**Se DESCONHECIDO:**
+   2. **Motivo:** Não há informações suficientes nos documentos fornecidos para avaliar este critério.
 
 **Contexto:** Esta avaliação refere-se especificamente aos critérios e requisitos do Technology Readiness Level ${trlLevel}.`;
 
