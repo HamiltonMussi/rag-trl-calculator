@@ -29,16 +29,6 @@ class OptimizedPromptBuilder:
         "• Use apenas alternativas fornecidas\n"
         "• Fundamente em contexto explícito\n\n"
         
-        "Exemplos:\n"
-        "P: TRL radar? a)TRL4 b)TRL6 c)TRL8\n"
-        "R: b)TRL6. RelatorioTec.pdf, Validação: 'testado ambiente operacional relevante, funcionalidades principais'. Caracteriza TRL6.\n\n"
-        
-        "P: Eficiência? a)85% b)92% c)78%\n" 
-        "R: INCOMPLETO. ManualTec.pdf/Especific.pdf não contêm dados eficiência energética.\n\n"
-        
-        "P: Atende requisitos? a)Parcial b)Completo c)Não\n"
-        "R: b)Completo. AvalMilitar.pdf, Conformidade: '12 requisitos validados' + TestesOp.pdf, Resultados: 'aprovação cenários militares'.\n\n"
-        
         "Verificação final:\n"
         "✓ Baseado exclusivamente no contexto?\n"
         "✓ Fontes citadas corretamente?\n" 

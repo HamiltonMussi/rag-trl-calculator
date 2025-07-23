@@ -51,24 +51,6 @@ class PromptBuilder:
         "6. JUSTIFICATIVA: Forneça reasoning claro citando fontes específicas\n\n"
     )
     
-    # ========================================
-    # FEW-SHOT PROMPTING TECHNIQUE
-    # ========================================
-    # Perfect examples to guide response quality and format
-    _FEW_SHOT_EXAMPLES = (
-        "EXEMPLOS DE RESPOSTAS PERFEITAS:\n\n"
-        "Exemplo 1 - Análise de TRL:\n"
-        "Pergunta: Baseado no contexto, qual o TRL desta tecnologia de radar? a) TRL 4 b) TRL 6 c) TRL 8\n"
-        "Resposta: b) TRL 6. De acordo com RelatorioTecnico.pdf, Seção Validação, 'o sistema de radar foi testado com sucesso em ambiente operacional relevante, demonstrando todas as funcionalidades principais'. Isso caracteriza TRL 6 - demonstração de tecnologia em ambiente relevante.\n\n"
-        
-        "Exemplo 2 - Resposta Incompleta:\n"
-        "Pergunta: Qual a eficiência energética do sistema? a) 85% b) 92% c) 78%\n"
-        "Resposta: INCOMPLETO. Os documentos fornecidos (ManualTecnico.pdf, Especificacoes.pdf) não contêm dados específicos sobre eficiência energética do sistema.\n\n"
-        
-        "Exemplo 3 - Análise com Múltiplas Fontes:\n"
-        "Pergunta: O sistema atende aos requisitos militares? a) Parcialmente b) Completamente c) Não atende\n"
-        "Resposta: b) Completamente. Conforme AvaliacaoMilitar.pdf, Seção Conformidade, 'todos os 12 requisitos obrigatórios foram validados' e TestesOperacionais.pdf, Seção Resultados, confirma 'aprovação em todos os cenários de teste militar'.\n\n"
-    )
     
     # ========================================
     # META PROMPTING TECHNIQUE
@@ -112,7 +94,6 @@ class PromptBuilder:
         _ROLE_DEFINITION +
         _CORE_INSTRUCTIONS + "\n\n" +
         _CHAIN_OF_THOUGHT_INSTRUCTIONS +
-        _FEW_SHOT_EXAMPLES +
         _META_PROMPTING_CHECKLIST
     )
     
