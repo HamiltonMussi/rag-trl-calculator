@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/store:/app/store
+      - ./backend/uploads:/app/uploads
+      - ./backend/sessions.json:/app/sessions.json
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
