@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Tuple
 
 from services.llm_client import LLMClientFactory
-from services.prompt_builder_optimized import OptimizedPromptBuilder as PromptBuilder
+from services.prompt_builder import PromptBuilder
 from services.validation import ValidationError
 
 logging.basicConfig(level=logging.INFO)
