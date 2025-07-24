@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 from functools import lru_cache
 from transformers import pipeline, GenerationConfig, AutoTokenizer, AutoModelForCausalLM
 import torch
@@ -173,7 +173,7 @@ class LocalLLMClient(LLMClient):
             logger.error(f"Local LLM generation error: {e}", exc_info=True)
             raise
     
-    def _extract_message_content(self, messages: List[Dict[str, str]]) -> tuple[str, str]:
+    def _extract_message_content(self, messages: List[Dict[str, str]]) -> Tuple[str, str]:
         """Extract system and user content from messages."""
         system_content = ""
         user_content = ""

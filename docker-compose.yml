@@ -9,6 +9,8 @@ services:
       - ./backend/store:/app/store
       - ./backend/uploads:/app/uploads
       - ./backend/sessions.json:/app/sessions.json
+    env_file:
+      - ./backend/.env
     environment:
       - PYTHONPATH=/app
     restart: unless-stopped
