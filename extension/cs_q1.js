@@ -35,19 +35,44 @@ function showLoader(msg){
           animation: fadeInScale 0.3s ease-out;
         ">
           <div style="
-            width: 48px;
-            height: 48px;
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: trlspin 1s linear infinite;
-            margin-bottom: 16px;
-          "></div>
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              width: 80px;
+              height: 80px;
+              border: 4px solid #e5e7eb;
+              border-top: 4px solid #00c5a4;
+              border-radius: 50%;
+              animation: trlspin 1s linear infinite;
+              position: absolute;
+              top: 0;
+              left: 0;
+            "></div>
+            <img src="${chrome.runtime.getURL('icons/logo.png')}" style="
+              width: 48px;
+              height: 48px;
+              object-fit: contain;
+              z-index: 1;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-40%, -40%);
+              margin: 0;
+              padding: 0;
+              display: block;
+            " alt="Company Logo" />
+          </div>
           <p id="trlLoaderText" style="
             margin: 0;
             font-weight: 500;
             font-size: 16px;
-            color: #374151;
+            color: #0c3943;
             text-align: center;
           "></p>
         </div>`;
@@ -86,7 +111,7 @@ function showNotification(message, type = 'success', duration = 3000) {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#667eea'};
+    background: ${type === 'success' ? '#00c5a4' : type === 'error' ? '#ef4444' : '#0c3943'};
     color: white;
     padding: 16px 24px;
     border-radius: 12px;
@@ -192,7 +217,7 @@ function showNotification(message, type = 'success', duration = 3000) {
             animation:modalSlideIn 0.3s ease-out forwards;">
           
           <!-- Header -->
-          <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+          <div style="background:linear-gradient(135deg,#0c3943 0%,#00c5a4 100%);
               color:white;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center;">
             <div style="font-size:24px;font-weight:600;margin-bottom:8px;">
               📄 Gerenciar Documentos
@@ -220,7 +245,7 @@ function showNotification(message, type = 'success', duration = 3000) {
               </div>
               <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" 
                   style="display:none;" />
-              <div id="selectFilesBtn" style="display:inline-block;background:#667eea;color:white;padding:10px 20px;
+              <div id="selectFilesBtn" style="display:inline-block;background:#0c3943;color:white;padding:10px 20px;
                   border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;
                   transition:background 0.2s ease;">
                 Selecionar Arquivos
@@ -242,7 +267,7 @@ function showNotification(message, type = 'success', duration = 3000) {
                 <span id="progressText" style="font-size:14px;color:#6b7280;">0%</span>
               </div>
               <div style="background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden;">
-                <div id="progressBar" style="background:linear-gradient(90deg,#667eea,#764ba2);
+                <div id="progressBar" style="background:linear-gradient(90deg,#0c3943,#00c5a4);
                     height:100%;transition:width 0.3s ease;width:0%;"></div>
               </div>
             </div>
@@ -271,21 +296,21 @@ function showNotification(message, type = 'success', duration = 3000) {
           to { transform: scale(1); opacity: 1; }
         }
         #dropZone:hover {
-          border-color: #667eea !important;
-          background: #f0f4ff !important;
+          border-color: #00c5a4 !important;
+          background: #fff7d6 !important;
         }
         #dropZone.dragover {
-          border-color: #667eea !important;
-          background: #e0e7ff !important;
+          border-color: #00c5a4 !important;
+          background: #fff7d6 !important;
           transform: scale(1.02);
         }
         #actionBtn:not(:disabled) {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          background: linear-gradient(135deg, #0c3943 0%, #00c5a4 100%) !important;
           cursor: pointer !important;
         }
         #actionBtn:not(:disabled):hover {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 12px rgba(12, 57, 67, 0.4);
         }
         #cancelBtn:hover {
           background: #e5e7eb !important;
@@ -452,7 +477,7 @@ function showNotification(message, type = 'success', duration = 3000) {
         
         fileItem.innerHTML = `
           <div>
-            <div class="file-name">${file.filename} <span style="color:#10b981;font-size:11px;">✓ Carregado</span></div>
+            <div class="file-name">${file.filename} <span style="color:#00c5a4;font-size:11px;">✓ Carregado</span></div>
             <div class="file-size">${fileSize} MB • ${uploadDate}</div>
           </div>
           <button class="file-remove" data-existing-filename="${file.filename}">Remover</button>
@@ -480,7 +505,7 @@ function showNotification(message, type = 'success', duration = 3000) {
         const fileSize = (file.size / 1024 / 1024).toFixed(2);
         fileItem.innerHTML = `
           <div>
-            <div class="file-name">${file.name} <span style="color:#667eea;font-size:11px;">📤 Para enviar</span></div>
+            <div class="file-name">${file.name} <span style="color:#0c3943;font-size:11px;">📤 Para enviar</span></div>
             <div class="file-size">${fileSize} MB</div>
           </div>
           <button class="file-remove" data-index="${index}">Remover</button>
@@ -607,7 +632,7 @@ function showNotification(message, type = 'success', duration = 3000) {
       const aiButtons = document.querySelectorAll('.ai-assist-button, button[innerHTML*="AI Assist"]');
       aiButtons.forEach(btn => {
         btn.disabled = false;
-        btn.style.background = '#3498db';
+        btn.style.background = '#00c5a4';
         btn.style.cursor = 'pointer';
         btn.style.opacity = '1';
         btn.title = '';
@@ -657,7 +682,7 @@ function showNotification(message, type = 'success', duration = 3000) {
         
         // Success state
         progressText.textContent = 'Concluído!';
-        progressBar.style.background = '#10b981';
+        progressBar.style.background = '#00c5a4';
         
         // Clear selected files and reload existing files to show newly uploaded files
         selectedFiles = [];
@@ -970,7 +995,7 @@ Se múltiplas alternativas estiverem corretas, indique a última que estiver cor
     div.innerHTML = `
         <!-- Header -->
         <div style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0c3943 0%, #00c5a4 100%);
             color: white;
             padding: 20px 24px;
             display: flex;
@@ -978,7 +1003,22 @@ Se múltiplas alternativas estiverem corretas, indique a última que estiver cor
             align-items: center;
         ">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 20px;">🤖</span>
+                <div style="
+                    width: 28px;
+                    height: 28px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                ">
+                    <img src="${chrome.runtime.getURL('icons/logo.png')}" style="
+                        width: 20px;
+                        height: 20px;
+                        object-fit: contain;
+                    " alt="Company Logo" />
+                </div>
                 <span style="font-size: 16px; font-weight: 600;">Sugestão da IA</span>
             </div>
             <button id="aiClose" style="
@@ -997,13 +1037,13 @@ Se múltiplas alternativas estiverem corretas, indique a última que estiver cor
         <!-- Content -->
         <div style="padding: 24px;">
             <div style="
-                background: #f8f9fc;
+                background: #fff7d6;
                 padding: 16px;
                 border-radius: 8px;
                 font-size: 14px;
                 line-height: 1.6;
-                color: #374151;
-                border: 1px solid #e5e7eb;
+                color: #0c3943;
+                border: 1px solid #00c5a4;
             ">
                 ${formattedText}
             </div>

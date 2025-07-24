@@ -1,5 +1,5 @@
 {
-    "name": "TRL Helper",
+    "name": "araucárIA",
     "version": "0.1",
     "manifest_version": 3,
     "description": "Assistente AI para preenchimento do cálculo TRL",
@@ -45,6 +45,12 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
+    "web_accessible_resources": [
+      {
+        "resources": ["icons/logo.png"],
+        "matches": ["https://avantec.eb.mil.br/*"]
+      }
+    ],
     "action": {
       "default_title": "TRL-AI",
       "default_icon": {
