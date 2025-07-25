@@ -12,6 +12,7 @@ def create_semantic_chunks(text, chunk_size_tokens=450, chunk_overlap_tokens=50)
     """
     tokenizer = get_just_tokenizer()
     logger.info(f"create_semantic_chunks called. Text length: {len(text)} chars. Target chunk size: {chunk_size_tokens} tokens, Overlap: {chunk_overlap_tokens} tokens.")
+    logger.info(f"First 500 chars of text: {repr(text[:500])}")
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size_tokens,
@@ -28,7 +29,7 @@ def create_semantic_chunks(text, chunk_size_tokens=450, chunk_overlap_tokens=50)
     section_headers = {
         'abstract':   r'(?i)^\s*(?:\d+\.?\s*)?(?:abstract|resumo|sumário executivo)\b',
         'introduction': r'(?i)^\s*(?:\d+\.?\s*)?(?:introduction|introdução)\b',
-        'methodology':r'(?i)^\s*(?:\d+\.?\s*)?(?:methodology|methods|materials and methods|metodologia|materiais e métodos)\b',
+        'methodology':r'(?i)^\s*(?:\d+\.?\s*)?(?:methodology|methods|materials and methods|metodologia|materiais e métodos|desenvolvimento)\b',
         'results':    r'(?i)^\s*(?:\d+\.?\s*)?(?:results|resultados)\b',
         'discussion': r'(?i)^\s*(?:\d+\.?\s*)?(?:discussion|discussão)\b',
         'conclusion': r'(?i)^\s*(?:\d+\.?\s*)?(?:conclusion|conclusions|conclusão|conclusões)\b',
@@ -39,25 +40,56 @@ def create_semantic_chunks(text, chunk_size_tokens=450, chunk_overlap_tokens=50)
     current_section_texts_buffer = []
     paragraphs = text.split('\n\n')
     logger.info(f"Initial coarse split into {len(paragraphs)} paragraphs for section detection.")
-    for para in paragraphs:
+    logger.info(f"First 3 paragraphs: {[p[:100] + '...' if len(p) > 100 else p for p in paragraphs[:3]]}")
+    logger.info(f"Paragraph lengths: {[len(p) for p in paragraphs[:10]]}")
+    
+    # Also try splitting by single newlines if we have very few paragraphs
+    if len(paragraphs) < 20:
+        alt_paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+        logger.info(f"Alternative split by single newlines: {len(alt_paragraphs)} parts")
+        logger.info(f"First 5 alt parts: {[p[:50] + '...' if len(p) > 50 else p for p in alt_paragraphs[:5]]}")
+        
+        # Use alternative split if it gives us more reasonable sections
+        if len(alt_paragraphs) > len(paragraphs) * 3:
+            paragraphs = alt_paragraphs
+            logger.info(f"Using alternative paragraph split with {len(paragraphs)} parts")
+    
+    # Track paragraph index to restrict abstract detection to early paragraphs
+    for para_idx, para in enumerate(paragraphs):
         para_strip = para.strip()
         if not para_strip:
             current_section_texts_buffer.append(para)
             continue
         matched_section = False
-        first_line_of_para = para_strip.split('\n')[0]
-        for section_key, pattern in section_headers.items():
-            if re.search(pattern, first_line_of_para):
-                if current_section_texts_buffer:
-                    sections_map[current_section_key].append("\n\n".join(current_section_texts_buffer))
-                    current_section_texts_buffer = []
-                current_section_key = section_key
-                header_plus_content = para_strip.split('\n', 1)
-                if len(header_plus_content) > 1 and header_plus_content[1].strip():
-                    current_section_texts_buffer.append(header_plus_content[1].strip())
-                matched_section = True
+        logger.debug(f"Checking paragraph: '{para_strip[:100]}...'")
+        
+        # Check each line in the paragraph for section headers
+        lines = para_strip.split('\n')
+        for line_idx, line in enumerate(lines):
+            line_strip = line.strip()
+            for section_key, pattern in section_headers.items():
+                if re.match(pattern, line_strip):
+                    logger.info(f"MATCHED section '{section_key}' with pattern '{pattern}' in line: '{line_strip}' (paragraph {para_idx})")
+                    if current_section_texts_buffer:
+                        sections_map[current_section_key].append("\n\n".join(current_section_texts_buffer))
+                        current_section_texts_buffer = []
+                    current_section_key = section_key
+                    
+                    # Add remaining lines after the header to buffer
+                    remaining_lines = lines[line_idx + 1:]
+                    if remaining_lines:
+                        remaining_content = '\n'.join(remaining_lines).strip()
+                        if remaining_content:
+                            current_section_texts_buffer.append(remaining_content)
+                    
+                    matched_section = True
+                    logger.info(f"Current section is now: '{current_section_key}'")
+                    break
+            if matched_section:
                 break
+                
         if not matched_section:
+            logger.debug(f"No section match found for paragraph: '{para_strip[:50]}...'")
             current_section_texts_buffer.append(para)
     if current_section_texts_buffer:
         sections_map[current_section_key].append("\n\n".join(current_section_texts_buffer))
@@ -93,4 +125,12 @@ def create_semantic_chunks(text, chunk_size_tokens=450, chunk_overlap_tokens=50)
                 'metadata': {'section': 'other', 'chunk_in_section': i + 1, 'char_length': len(chunk_text), 'token_count': token_count}
             })
         logger.info(f"Section 'other' yielded {len(split_other_texts)} chunks.")
+    
+    # Log final section distribution
+    section_counts = {}
+    for chunk in final_chunks:
+        section = chunk.get('section', 'unknown')
+        section_counts[section] = section_counts.get(section, 0) + 1
+    logger.info(f"Final section distribution: {section_counts}")
+    
     return final_chunks 
