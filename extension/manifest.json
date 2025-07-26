@@ -1,8 +1,8 @@
 {
     "name": "araucárIA",
-    "version": "0.1",
+    "version": "0.2",
     "manifest_version": 3,
-    "description": "Assistente AI para preenchimento do cálculo TRL",
+    "description": "Assistente AI para preenchimento do cálculo TRL - Refatorado com arquitetura moderna",
     "permissions": [
       "storage",
       "scripting",
@@ -15,11 +15,13 @@
     "content_scripts": [
       {
         "matches": ["https://avantec.eb.mil.br/initialquestions*"],
-        "js": ["cs_initial.js"]
+        "js": ["src/js/initial.js"],
+        "css": ["src/css/components.css", "src/css/animations.css", "src/css/utilities.css", "src/css/accessibility.css"]
       },
       {
         "matches": ["https://avantec.eb.mil.br/questionario1*"],
-        "js": ["cs_q1.js"]
+        "js": ["src/js/questionnaire.js"],
+        "css": ["src/css/components.css", "src/css/animations.css", "src/css/utilities.css", "src/css/accessibility.css"]
       },
       {
         "matches": [
@@ -33,31 +35,38 @@
           "https://avantec.eb.mil.br/TRL8*",
           "https://avantec.eb.mil.br/TRL9*"
         ],
-        "js": ["cs_trl_qs.js"]
+        "js": ["src/js/trl-questions.js"],
+        "css": ["src/css/components.css", "src/css/animations.css", "src/css/utilities.css", "src/css/accessibility.css"]
       }
     ],
     "background": {
-      "service_worker": "sw.js"
+      "service_worker": "src/js/background.js"
     },
     "icons": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "assets/icons/icon16.png",
+      "32": "assets/icons/icon32.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
     },
     "web_accessible_resources": [
       {
-        "resources": ["icons/logo.png"],
+        "resources": [
+          "assets/icons/*",
+          "src/css/*",
+          "src/js/*",
+          "src/utils/*",
+          "src/components/*"
+        ],
         "matches": ["https://avantec.eb.mil.br/*"]
       }
     ],
     "action": {
       "default_title": "TRL-AI",
       "default_icon": {
-        "16": "icons/icon16.png",
-        "32": "icons/icon32.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
+        "16": "assets/icons/icon16.png",
+        "32": "assets/icons/icon32.png",
+        "48": "assets/icons/icon48.png",
+        "128": "assets/icons/icon128.png"
       }
     }
   }

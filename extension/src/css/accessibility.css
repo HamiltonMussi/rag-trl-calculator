@@ -1,0 +1,358 @@
+/* === Accessibility Styles === */
+
+/* Focus Management */
+.focus-visible:focus {
+  outline: 2px solid #00c5a4;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 197, 164, 0.2);
+}
+
+.focus-visible:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .ai-assist-button {
+    border: 2px solid currentColor;
+  }
+  
+  .trl-loader {
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .notification {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .trl-loader__spinner {
+    animation: none;
+    border: 4px solid #00c5a4;
+  }
+}
+
+/* Screen Reader Support */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: inherit !important;
+}
+
+/* Color Accessibility */
+.text-high-contrast {
+  color: #000000;
+  background-color: #ffffff;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000000;
+  color: #ffffff;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 10002;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Interactive Element States */
+.interactive-element {
+  cursor: pointer;
+  user-select: none;
+}
+
+.interactive-element:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.interactive-element[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Loading States for Screen Readers */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Error States */
+[aria-invalid="true"] {
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 16px;
+}
+
+/* Success States */
+.success-message {
+  color: #10b981;
+  font-size: 14px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.success-message::before {
+  content: "✓";
+  font-size: 16px;
+}
+
+/* Progress Indicators */
+.progress-bar {
+  position: relative;
+}
+
+.progress-bar::after {
+  content: attr(aria-valuenow) "% complete";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Modal Accessibility */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+  color: #374151;
+}
+
+/* Tooltip Accessibility */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #374151;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10001;
+}
+
+.tooltip:hover .tooltip-content,
+.tooltip:focus .tooltip-content {
+  opacity: 1;
+}
+
+.tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #374151;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.button-group .btn:not(:last-child) {
+  margin-right: 0;
+}
+
+/* Form Labels */
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #374151;
+}
+
+.form-label.required::after {
+  content: " *";
+  color: #ef4444;
+}
+
+/* Loading Announcements */
+.loading-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .ai-answer {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .ai-answer__text {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #00c5a4;
+  }
+  
+  .trl-modal__content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .file-item {
+    background: #374151;
+  }
+  
+  .drop-zone {
+    background: #374151;
+    border-color: #6b7280;
+  }
+  
+  .drop-zone:hover,
+  .drop-zone--dragover {
+    background: #1f2937;
+    border-color: #00c5a4;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ai-assist-button,
+  .trl-loader,
+  .notification,
+  .trl-modal,
+  .ai-answer {
+    display: none !important;
+  }
+}
+
+/* Touch Device Support */
+@media (hover: none) and (pointer: coarse) {
+  .ai-assist-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+  }
+  
+  .btn {
+    min-height: 44px;
+    padding: 12px 24px;
+  }
+  
+  .file-item__remove {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 12px;
+  }
+}
