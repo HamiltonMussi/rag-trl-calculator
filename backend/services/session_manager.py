@@ -37,7 +37,7 @@ class SessionManager:
         try:
             with open(self.sessions_file, 'w') as f:
                 json.dump(self._sessions, f, indent=2)
-            logger.debug(f"Saved {len(self._sessions)} sessions to file")
+            logger.info(f"Saved {len(self._sessions)} sessions to file")
         except Exception as e:
             logger.error(f"Could not save sessions file: {e}")
     

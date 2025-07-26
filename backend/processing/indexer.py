@@ -1,144 +1,88 @@
+"""Document indexing service with improved architecture."""
+
 import pathlib
 import logging
-import PyPDF2
-from processing.document_processor import create_semantic_chunks
-from utils.hf_models import get_hf_embeddings
-from chromadb import PersistentClient
 from typing import Dict
 
+from utils.file_utils import FileProcessor, generate_unique_chunk_ids
+from services.document_service import DocumentProcessor
+from services.chromadb_service import ChromaDBService
+from utils.hf_models import get_hf_embeddings
+
 logger = logging.getLogger(__name__)
-ROOT = pathlib.Path(__file__).parent.parent
-client = PersistentClient(str(ROOT / "store"))
+
+# Global processing status tracker
 processing_status: Dict[str, bool] = {}
+
+# Initialize services
+chromadb_service = ChromaDBService()
+document_processor = DocumentProcessor()
 
 def is_processing(technology_id: str) -> bool:
     return processing_status.get(technology_id, False)
 
-def remove_document_from_index(tech_id: str, filename: str):
+def remove_document_from_index(tech_id: str, filename: str) -> bool:
     """Remove all chunks related to a specific file from the ChromaDB collection."""
-    logger.info(f"Starting remove_document_from_index for file: {filename}, tech_id: {tech_id}")
-    try:
-        collection_name = f"tech_{tech_id}"
-        collection = client.get_or_create_collection(
-            name=collection_name,
-            metadata={"hnsw:space": "cosine"}
-        )
-        
-        # Get all documents from the collection to find ones related to this file
-        results = collection.get()
-        
-        # Find IDs of chunks that belong to this file
-        ids_to_remove = []
-        for i, metadata in enumerate(results['metadatas']):
-            if metadata and metadata.get('source') == filename:
-                ids_to_remove.append(results['ids'][i])
-        
-        if ids_to_remove:
-            collection.delete(ids=ids_to_remove)
-            logger.info(f"Successfully removed {len(ids_to_remove)} chunks for file '{filename}' from collection '{collection_name}'.")
-            return True
-        else:
-            logger.info(f"No chunks found for file '{filename}' in collection '{collection_name}'.")
-            return True
-            
-    except Exception as e:
-        logger.error(f"Error removing document {filename} from index for {tech_id}: {str(e)}", exc_info=True)
-        return False
+    logger.info(f"Removing document '{filename}' from index for tech_id: {tech_id}")
+    return chromadb_service.remove_document_chunks(tech_id, filename)
 
-def process_and_index_document(file_path: str, tech_id: str):
-    logger.info(f"Starting process_and_index_document for file: {file_path}, tech_id: {tech_id}")
+def process_and_index_document(file_path: str, tech_id: str) -> bool:
+    """Process and index a document for a specific technology."""
+    logger.info(f"Starting document processing for file: {file_path}, tech_id: {tech_id}")
+    
     global processing_status
     processing_status[tech_id] = True
-    text_content = ""
+    
     try:
-        original_file_path = pathlib.Path(file_path)
-        file_extension = original_file_path.suffix.lower()
-        logger.info(f"Detected file extension: {file_extension} for {file_path}")
-        if file_extension == ".pdf":
-            logger.info(f"Attempting to extract text from PDF: {file_path}")
-            try:
-                with open(file_path, "rb") as f_pdf:
-                    reader = PyPDF2.PdfReader(f_pdf)
-                    extracted_pages = []
-                    for page_num in range(len(reader.pages)):
-                        page = reader.pages[page_num]
-                        extracted_pages.append(page.extract_text() or "")
-                    text_content = "\n".join(extracted_pages)
-                if not text_content.strip():
-                    logger.warning(f"PyPDF2 extracted no text from PDF: {file_path}")
-                else:
-                    logger.info(f"Successfully extracted {len(text_content)} characters from PDF: {file_path}")
-            except Exception as e:
-                logger.error(f"Error extracting text from PDF {file_path} using PyPDF2: {e}", exc_info=True)
-                processing_status[tech_id] = False
-                return False
-        elif file_extension in [".txt", ".md"]:
-            logger.info(f"Reading plain text file: {file_path}")
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    text_content = f.read()
-            except UnicodeDecodeError:
-                try:
-                    with open(file_path, "r", encoding="latin-1") as f:
-                        text_content = f.read()
-                    logger.warning(f"utf-8 decode failed for {file_path}; fell back to latin-1.")
-                except UnicodeDecodeError:
-                    with open(file_path, "rb") as f:
-                        raw = f.read()
-                    text_content = raw.decode("utf-8", errors="replace")
-                    logger.warning(f"Both utf-8 and latin-1 decode failed for {file_path}; used utf-8 with replacement characters.")
-        else:
-            logger.warning(f"Unsupported file type '{file_extension}' for {file_path}. Skipping processing.")
-            processing_status[tech_id] = False
-            return False
-        if not text_content.strip():
-            logger.warning(f"No text content extracted or read from {file_path}. Aborting indexing.")
-            processing_status[tech_id] = False
-            return False
-        logger.info(f"Calling create_semantic_chunks for content from {file_path}...")
-        chunks_data = create_semantic_chunks(text_content)
-        logger.info(f"create_semantic_chunks returned {len(chunks_data)} chunks for {file_path}.")
+        # Step 1: Extract text from file
+        success, text_content, error = FileProcessor.extract_text(file_path)
+        if not success:
+            logger.error(f"Failed to extract text from {file_path}: {error}")
+            return _set_processing_complete(tech_id, False)
         
-        # Add source filename to metadata
+        if not text_content.strip():
+            logger.warning(f"No text content found in {file_path}")
+            return _set_processing_complete(tech_id, False)
+        
+        # Step 2: Process document into chunks
         filename = pathlib.Path(file_path).name
-        for chunk in chunks_data:
-            chunk['metadata']['source'] = filename
-        if not chunks_data:
-            logger.warning(f"No chunks created for document {file_path}, tech_id {tech_id}. Aborting indexing for this file.")
-            processing_status[tech_id] = False
-            return False
+        success, chunks_data, error = document_processor.process_document(text_content, filename)
+        if not success:
+            logger.error(f"Failed to process document {file_path}: {error}")
+            return _set_processing_complete(tech_id, False)
+        
+        # Step 3: Generate embeddings
         chunk_texts = [chunk['text'] for chunk in chunks_data]
         chunk_metadatas = [chunk['metadata'] for chunk in chunks_data]
-        logger.info(f"Generating embeddings for {len(chunk_texts)} chunks from {file_path}...")
-        chunk_embeddings = get_hf_embeddings(chunk_texts)
-        logger.info(f"Embeddings generated for {len(chunk_texts)} chunks from {file_path}.")
-        if len(chunk_embeddings) != len(chunk_texts):
-            logger.error(f"Mismatch in number of chunks ({len(chunk_texts)}) and embeddings ({len(chunk_embeddings)}) for {file_path}. Skipping indexing.")
-            processing_status[tech_id] = False
-            return False
-        collection_name = f"tech_{tech_id}"
-        logger.info(f"Preparing to add {len(chunk_texts)} chunks to ChromaDB collection '{collection_name}'.")
-        collection = client.get_or_create_collection(
-            name=collection_name,
-            metadata={"hnsw:space": "cosine"}
-        )
-        logger.info(f"ChromaDB collection '{collection_name}' obtained/created.")
-        logger.info(f"Attempting to add {len(chunk_texts)} items to collection '{collection_name}'...")
-        # Generate unique IDs that include filename to prevent collisions
-        filename = pathlib.Path(file_path).name
-        filename_safe = filename.replace('.', '_').replace('-', '_')
-        unique_ids = [f"{tech_id}_{filename_safe}_{i}" for i in range(len(chunk_texts))]
         
-        collection.add(
-            documents=chunk_texts,
-            embeddings=chunk_embeddings,
-            metadatas=chunk_metadatas,
-            ids=unique_ids
+        logger.info(f"Generating embeddings for {len(chunk_texts)} chunks")
+        chunk_embeddings = get_hf_embeddings(chunk_texts)
+        
+        if len(chunk_embeddings) != len(chunk_texts):
+            logger.error(f"Embedding count mismatch: {len(chunk_embeddings)} vs {len(chunk_texts)}")
+            return _set_processing_complete(tech_id, False)
+        
+        # Step 4: Generate unique IDs and store in database
+        chunk_ids = generate_unique_chunk_ids(tech_id, filename, len(chunk_texts))
+        
+        success = chromadb_service.add_document_chunks(
+            tech_id, chunk_texts, chunk_embeddings, chunk_metadatas, chunk_ids
         )
-        logger.info(f"Successfully indexed {len(chunk_texts)} chunks for tech_id '{tech_id}' into collection '{collection_name}'.")
-        processing_status[tech_id] = False
-        return True
+        
+        if not success:
+            logger.error(f"Failed to store chunks in database for {file_path}")
+            return _set_processing_complete(tech_id, False)
+        
+        logger.info(f"Successfully indexed {len(chunk_texts)} chunks for tech_id '{tech_id}'")
+        return _set_processing_complete(tech_id, True)
+        
     except Exception as e:
-        logger.error(f"Error processing document {file_path} for {tech_id}: {str(e)}", exc_info=True)
-        processing_status[tech_id] = False
-        return False 
+        logger.error(f"Unexpected error processing document {file_path}: {e}", exc_info=True)
+        return _set_processing_complete(tech_id, False)
+
+
+def _set_processing_complete(tech_id: str, success: bool) -> bool:
+    """Helper function to set processing status and return result."""
+    global processing_status
+    processing_status[tech_id] = False
+    return success 

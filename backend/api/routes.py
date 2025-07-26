@@ -18,6 +18,7 @@ from retrieval.context_retriever import get_cached_search, trim_for_ctx
 from llm.response_generator import generate_llm_response, build_llm_prompt_and_messages
 from services.session_manager import SessionManager
 from services.validation import ValidationError
+from services.error_handler import ErrorHandler, ValidationService, ErrorCode
 import asyncio
 import logging
 import uuid
@@ -39,11 +40,12 @@ def handle_api_error(error: Exception, error_msg: str, status_code: int = 500) -
     logger.error(f"{error_msg}: {error}", exc_info=True)
     
     if isinstance(error, ValidationError):
+        app_error = ErrorHandler.create_validation_error(str(error))
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content=ErrorResponse(
-                detail=str(error),
-                error_code="VALIDATION_ERROR"
+                detail=app_error.message,
+                error_code=app_error.code.value
             ).model_dump()
         )
     
@@ -77,11 +79,31 @@ async def upload_files(data: FileUpload, background_tasks: BackgroundTasks):
         tech_dir = UPLOAD_ROOT / data.technology_id
         tech_dir.mkdir(exist_ok=True)
         
+        # Validate input parameters
+        validation_error = ValidationService.validate_file_upload(
+            data.filename, data.content_base64, data.technology_id
+        )
+        if validation_error:
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=ErrorResponse(
+                    detail=validation_error.message,
+                    error_code=validation_error.code.value
+                ).model_dump()
+            )
+        
         # Decode base64 content
         try:
             file_bytes = base64.b64decode(data.content_base64)
         except Exception as e:
-            raise ValidationError(f"Invalid base64 payload: {e}")
+            error = ErrorHandler.create_validation_error(f"Invalid base64 payload: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=ErrorResponse(
+                    detail=error.message,
+                    error_code=error.code.value
+                ).model_dump()
+            )
         
         # Write file (append for chunks > 0)
         target = tech_dir / data.filename
@@ -194,11 +216,25 @@ async def answer(data: Ask):
             technology_id = session_manager.get_technology_context(data.session_id)
         
         if not technology_id:
+            error = ErrorHandler.create_validation_error(
+                "No technology_id provided. Either include technology_id in request or set technology context first."
+            )
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=ErrorResponse(
-                    detail="No technology_id provided. Either include technology_id in request or set technology context first.",
+                    detail=error.message,
                     error_code="MISSING_TECHNOLOGY_ID"
+                ).model_dump()
+            )
+        
+        # Validate question
+        validation_error = ValidationService.validate_question(data.question)
+        if validation_error:
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content=ErrorResponse(
+                    detail=validation_error.message,
+                    error_code=validation_error.code.value
                 ).model_dump()
             )
         
@@ -210,11 +246,16 @@ async def answer(data: Ask):
         # Check if still processing
         if is_processing(technology_id):
             logger.warning(f"Attempt to answer for tech_id '{technology_id}' while it is processing.")
+            error = ErrorHandler.create_processing_error(
+                f"Document for technology_id '{technology_id}' is still being processed. Please wait and try again.",
+                technology_id,
+                ErrorCode.STILL_PROCESSING
+            )
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
                 content=ErrorResponse(
-                    detail=f"Document for technology_id '{technology_id}' is still being processed. Please wait and try again.",
-                    error_code="STILL_PROCESSING"
+                    detail=error.message,
+                    error_code=error.code.value
                 ).model_dump()
             )
         
@@ -234,10 +275,7 @@ async def answer(data: Ask):
         # Build prompt and generate response
         system_prompt, messages = build_llm_prompt_and_messages(technology_id, context, data.question)
         
-        logger.debug("=== Preparing messages for LLM ===")
-        logger.debug(f"System Prompt length: {len(system_prompt)} chars")
-        logger.debug(f"User Message length: {len(messages[1]['content'])} chars")
-        logger.debug("=================================")
+        logger.info(f"Preparing LLM request: system_prompt={len(system_prompt)} chars, user_message={len(messages[1]['content'])} chars")
         
         response_content = await asyncio.to_thread(generate_llm_response, messages=messages)
         
