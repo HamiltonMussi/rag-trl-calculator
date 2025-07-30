@@ -12,6 +12,7 @@ from typing import List, Dict
 
 from services.document_service import DocumentProcessor
 from utils.hf_models import get_just_tokenizer
+from config import LOCAL_LLM_MODEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -50,4 +51,4 @@ def create_semantic_chunks(text: str, chunk_size_tokens: int = 450, chunk_overla
 
 def get_just_tokenizer():
     """Legacy function for getting tokenizer."""
-    return get_just_tokenizer() 
+    return get_just_tokenizer(LOCAL_LLM_MODEL_ID) 

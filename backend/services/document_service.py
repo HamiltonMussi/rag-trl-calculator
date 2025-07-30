@@ -5,6 +5,7 @@ import re
 from typing import List, Dict, Tuple
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from utils.hf_models import get_just_tokenizer
+from config import LOCAL_LLM_MODEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class DocumentChunker:
         """
         self.chunk_size_tokens = chunk_size_tokens
         self.chunk_overlap_tokens = chunk_overlap_tokens
-        self.tokenizer = get_just_tokenizer()
+        self.tokenizer = get_just_tokenizer(LOCAL_LLM_MODEL_ID)
         
         # Initialize text splitter
         self.text_splitter = RecursiveCharacterTextSplitter(

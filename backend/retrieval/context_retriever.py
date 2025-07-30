@@ -6,6 +6,7 @@ import logging
 from processing.indexer import is_processing
 from services.chromadb_service import ChromaDBService
 from utils.hf_models import get_hf_embeddings, get_just_tokenizer
+from config import LOCAL_LLM_MODEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ def trim_for_ctx(passages: List[Dict], limit: int = 3500) -> str:
         logger.warning("No passages provided for context")
         return "Nenhum contexto específico encontrado."
     
-    tokenizer = get_just_tokenizer()
+    tokenizer = get_just_tokenizer(LOCAL_LLM_MODEL_ID)
     context_builder = ContextBuilder(tokenizer, limit)
     
     return context_builder.build_context(passages)

@@ -38,7 +38,7 @@ def get_hf_embeddings(texts: List[str], model_name: str = "sentence-transformers
     return [emb.tolist() for emb in embeddings]
 
 @lru_cache(maxsize=1)
-def get_just_tokenizer(model_id: str = "TucanoBR/Tucano-1b1-Instruct"):
+def get_just_tokenizer(model_id: str):
     logger.info(f"Loading ONLY tokenizer for model: {model_id}")
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     logger.info(f"Tokenizer for {model_id} loaded successfully.")

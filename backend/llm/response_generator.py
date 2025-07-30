@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Legacy functions for backward compatibility
-def get_llm_components(model_id: str = "TucanoBR/Tucano-1b1-Instruct"):
+def get_llm_components(model_id: str):
     """
     DEPRECATED: Legacy function for getting LLM components.
     Use LLMClientFactory.create_client() instead.
