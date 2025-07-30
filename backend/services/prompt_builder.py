@@ -151,6 +151,26 @@ class PromptBuilder:
         return f"### Tecnologia: {technology_id}\n### Contexto\n{context}\n\n### Pergunta\n{question}"
     
     
+    # ========================================
+    # OPTIMIZED PROMPT FOR 2B LOCAL MODELS
+    # ========================================
+    # Essential techniques condensed for small models
+    _OPTIMIZED_SYSTEM_PROMPT = (
+        "Você é especialista em TRL militar. NÃO INVENTE informações.\n\n"
+        
+        "PROCESSO: 1) Identifique conceitos TRL na pergunta 2) Examine evidências no contexto "
+        "3) Compare alternativas 4) Escolha mais precisa 5) Justifique com fontes\n\n"
+        
+        "REGRAS:\n"
+        "• Use APENAS informações do contexto fornecido\n"
+        "• Siga EXATAMENTE o formato de resposta se especificado\n"
+        "• Cite fontes: '(Fonte: Documento.pdf, Seção X)'\n"
+        "• Se sem informações suficientes: responda 'DESCONHECIDO'\n"
+        "• Resposta CURTA e OBJETIVA\n\n"
+        
+        "VERIFICAÇÃO: Baseado no contexto? Fontes citadas? Formato correto?"
+    )
+
     def build_local_llm_prompt(self, system_content: str, user_content: str) -> str:
         """
         Build prompt for local LLM with instruction format.
@@ -177,6 +197,49 @@ class PromptBuilder:
         except Exception as e:
             logger.error(f"Error building local LLM prompt: {e}")
             raise ValidationError(f"Failed to build local LLM prompt: {str(e)}")
+
+    def build_optimized_local_prompt(
+        self, 
+        technology_id: str, 
+        context: str, 
+        question: str
+    ) -> str:
+        """
+        Build optimized prompt specifically for 2B parameter local models.
+        Uses minimal, focused instructions to avoid overwhelming small models.
+        
+        Args:
+            technology_id: Technology identifier
+            context: Retrieved context for the question
+            question: User's question
+            
+        Returns:
+            Optimized prompt string for small models
+            
+        Raises:
+            ValidationError: If inputs are invalid
+        """
+        try:
+            # Validate inputs
+            validated_tech_id = self.validator.validate_technology_id(technology_id)
+            validated_context = self.validator.validate_context(context)
+            validated_question = self.validator.validate_question(question)
+            
+            # Build minimal user content
+            user_content = f"Tecnologia: {validated_tech_id}\n\nContexto:\n{validated_context}\n\nPergunta: {validated_question}"
+            
+            # Combine with optimized system prompt
+            full_instruction = f"{self._OPTIMIZED_SYSTEM_PROMPT}\n\n{user_content}"
+            
+            logger.debug(f"Built optimized prompt for technology: {validated_tech_id}")
+            return f"<instruction>{full_instruction.strip()}</instruction>"
+            
+        except ValidationError as e:
+            logger.error(f"Validation error in optimized prompt building: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error in optimized prompt building: {e}", exc_info=True)
+            raise ValidationError(f"Failed to build optimized prompt: {str(e)}")
     
     def get_truncated_prompt_for_logging(self, prompt: str, max_length: int = 2000) -> str:
         """Get a truncated version of prompt for logging purposes."""

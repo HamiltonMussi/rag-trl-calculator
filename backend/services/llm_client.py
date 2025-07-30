@@ -134,7 +134,7 @@ class LocalLLMClient(LLMClient):
     def _create_generation_config(self, tokenizer) -> GenerationConfig:
         """Create generation configuration."""
         return GenerationConfig(
-            max_new_tokens=200,
+            max_new_tokens=300,
             do_sample=False,
             top_p=1,
             repetition_penalty=1.0,
