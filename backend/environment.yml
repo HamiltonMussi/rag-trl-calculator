@@ -11,7 +11,7 @@ dependencies:
     - uvicorn==0.34.2
     - pydantic==2.11.3
     - numpy==2.2.5
-    - torch --index-url https://download.pytorch.org/whl/cu121
+    - torch==2.7.0
     - transformers==4.46.0
     - accelerate==1.6.0
     - chromadb==1.0.7
