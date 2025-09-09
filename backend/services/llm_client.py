@@ -7,7 +7,10 @@ from functools import lru_cache
 from transformers import pipeline, GenerationConfig, AutoTokenizer, AutoModelForCausalLM
 import torch
 
-from config import USE_LOCAL_LLM, LOCAL_LLM_MODEL_ID, OPENAI_MODEL_NAME, OPENAI_API_KEY
+from config import (
+    LOCAL_LLM_MODEL_ID, OPENAI_MODEL_NAME, OPENAI_API_KEY,
+    LLM_PROVIDER, HF_MODEL_NAME, HF_API_TOKEN
+)
 from .device_manager import device_manager
 from .validation import InputValidator, ValidationError
 from .prompt_builder import PromptBuilder
@@ -16,6 +19,8 @@ try:
     import openai
 except ImportError:
     openai = None
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -203,25 +208,86 @@ class LocalLLMClient(LLMClient):
         return cleaned
 
 
+class HuggingFaceInferenceClient(LLMClient):
+    """Client for Hugging Face Inference using OpenAI client with HF router."""
+    
+    def __init__(self, model_name: str, api_token: str):
+        self.validator = InputValidator()
+        
+        if not model_name:
+            raise ValidationError("HuggingFace model name is required")
+        if not api_token:
+            raise ValidationError("HuggingFace API token is required")
+        
+        if openai is None:
+            raise ImportError("openai package is not installed")
+        
+        self.model_name = model_name
+        # Use OpenAI client with HuggingFace router
+        self.client = openai.OpenAI(
+            base_url="https://router.huggingface.co/v1",
+            api_key=api_token
+        )
+        logger.info(f"Initialized HuggingFace Inference client with model: {model_name}")
+    
+    def generate_response(self, messages: List[Dict[str, str]]) -> str:
+        """Generate response using HuggingFace router via OpenAI client."""
+        try:
+            validated_messages = self.validator.validate_messages(messages)
+            
+            # Use chat completions API exactly like OpenAI
+            completion = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=validated_messages,
+                max_tokens=512,
+                temperature=0.2,
+                top_p=0.9
+            )
+            
+            content = completion.choices[0].message.content
+            if not content:
+                raise ValueError("Empty response from HuggingFace Inference")
+            
+            return content.strip()
+            
+        except Exception as e:
+            logger.error(f"HuggingFace Inference error: {e}", exc_info=True)
+            raise
+
+
 class LLMClientFactory:
     """Factory for creating appropriate LLM clients."""
     
     @staticmethod
-    def create_client(use_local: bool = None, model_id: str = None) -> LLMClient:
+    def create_client(use_local: bool = None, model_id: str = None, provider: str = None) -> LLMClient:
         """
         Create appropriate LLM client based on configuration.
         
         Args:
-            use_local: Override for USE_LOCAL_LLM config
-            model_id: Override for model ID
+            use_local: Override for USE_LOCAL_LLM config (deprecated, use provider)
+            model_id: Override for model ID (for local models)
+            provider: Override for LLM_PROVIDER config ("local", "openai", "huggingface")
             
         Returns:
             Configured LLM client
         """
-        use_local_llm = use_local if use_local is not None else USE_LOCAL_LLM
+        # Determine provider
+        if provider is not None:
+            selected_provider = provider
+        elif use_local is not None:
+            # Legacy support
+            selected_provider = "local" if use_local else "openai"
+        else:
+            selected_provider = LLM_PROVIDER
         
-        if use_local_llm:
+        # Create appropriate client
+        if selected_provider == "local":
             model_to_use = model_id or LOCAL_LLM_MODEL_ID
             return LocalLLMClient(model_to_use)
-        else:
+        elif selected_provider == "openai":
             return OpenAIClient(OPENAI_API_KEY, OPENAI_MODEL_NAME)
+        elif selected_provider == "huggingface":
+            return HuggingFaceInferenceClient(HF_MODEL_NAME, HF_API_TOKEN)
+        else:
+            raise ValueError(f"Unsupported LLM provider: {selected_provider}. "
+                           f"Supported providers: local, openai, huggingface")
