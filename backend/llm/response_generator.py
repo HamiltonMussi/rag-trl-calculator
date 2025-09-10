@@ -63,7 +63,8 @@ def build_llm_prompt_and_messages(
 
 def generate_llm_response(
     messages: List[Dict[str, str]], 
-    model_id: str = None
+    model_id: str = None,
+    provider: str = None
 ) -> str:
     """
     Generate LLM response using configured client.
@@ -71,6 +72,7 @@ def generate_llm_response(
     Args:
         messages: List of message dictionaries with 'role' and 'content'
         model_id: Optional model ID override for local LLM
+        provider: Optional provider override ("local", "openai", "huggingface")
         
     Returns:
         Generated response text
@@ -81,10 +83,10 @@ def generate_llm_response(
     """
     try:
         # Create appropriate client
-        client = LLMClientFactory.create_client(model_id=model_id)
+        client = LLMClientFactory.create_client(model_id=model_id, provider=provider)
         
         # Generate response
-        logger.info("Generating LLM response")
+        logger.info(f"Generating LLM response using provider: {provider or 'default'}")
         response = client.generate_response(messages)
         
         if not response.strip():
