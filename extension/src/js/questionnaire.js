@@ -675,19 +675,27 @@ ${opts.map((o, index) => `${o.value}) ${o.text}`).join('\n')}
                 return {value: r.value, text: label};
             });
 
-            const questionContext = `Analise a seguinte pergunta e suas alternativas:
+            const questionContext = `**Pergunta de Múltipla Escolha sobre TRL:**
 
 ${question}
 
-Alternativas:
-${opts.map(o => `${o.value}) ${o.text}`).join("\n")}
+**Alternativas disponíveis:**
+${opts.map(o => `${o.value}) ${o.text}`).join('\n')}
 
-Responda de forma concisa qual alternativa está correta e por quê. 
-Se múltiplas alternativas estiverem corretas, indique a última que estiver correta.`;
+**Formato de Resposta Requerido:**
 
-            console.log("=== General Question Prompt ===");
+**Se há informações suficientes:**
+1. **Resposta:** [Letra da alternativa correta]
+2. **Justificativa:** [Explicação detalhada baseada nos documentos, citando fontes específicas]
+
+**Se não há informações suficientes:**
+1. **Resposta:** DESCONHECIDO - Não há informações suficientes nos documentos fornecidos para responder esta pergunta.
+
+**Instrução:** Selecione e justifique a alternativa mais adequada com base nos critérios TRL. Se múltiplas alternativas estiverem tecnicamente corretas, selecione a última (mais avançada) da lista.`;
+
+            console.log(`=== Specific Question Prompt (${questionDiv.id}) ===`);
             console.log(questionContext);
-            console.log("==============================");
+            console.log("============================================");
 
             showLoader("Consultando IA...");
             const resp = await apiFetch("http://127.0.0.1:8000/answer", {
