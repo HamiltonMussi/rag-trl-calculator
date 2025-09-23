@@ -240,8 +240,8 @@ class HuggingFaceInferenceClient(LLMClient):
                 model=self.model_name,
                 messages=validated_messages,
                 max_tokens=512,
-                temperature=0.2,
-                top_p=0.9
+                temperature=0.0,
+                top_p=1.0
             )
             
             content = completion.choices[0].message.content
