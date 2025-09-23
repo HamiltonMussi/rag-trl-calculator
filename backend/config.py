@@ -2,7 +2,7 @@
 import os
 
 # LLM provider options: "local", "openai", "huggingface"
-LLM_PROVIDER = "huggingface"
+LLM_PROVIDER = "openai"
 
 # Local LLM model name (HuggingFace model id)
 LOCAL_LLM_MODEL_ID = "TucanoBR/Tucano-2b4-Instruct"
@@ -16,3 +16,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Hugging Face Inference configuration
 HF_MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct:featherless-ai"  # Default HF model
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+
+# Test mode flags
+ENABLE_RAG = os.getenv("ENABLE_RAG", "true").lower() == "true"
+ENABLE_PROMPT_ENGINEERING = os.getenv("ENABLE_PROMPT_ENGINEERING", "true").lower() == "true"
