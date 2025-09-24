@@ -21,5 +21,5 @@ HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 # Test mode flags
 ENABLE_RAG = os.getenv("ENABLE_RAG", "true").lower() == "true"
 ENABLE_PROMPT_ENGINEERING = os.getenv("ENABLE_PROMPT_ENGINEERING", "true").lower() == "true"
-ENABLE_EVALUATION = os.getenv("ENABLE_EVALUATION", "true").lower() == "true"
+ENABLE_EVALUATION = os.getenv("ENABLE_EVALUATION", "true").lower() == "false"
 EVALUATION_MODEL = os.getenv("EVALUATION_MODEL", "gpt-4o-mini")
