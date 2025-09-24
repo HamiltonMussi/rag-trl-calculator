@@ -239,7 +239,7 @@ class HuggingFaceInferenceClient(LLMClient):
             completion = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=validated_messages,
-                max_tokens=512,
+                max_tokens=2048,
                 temperature=0.0,
                 top_p=1.0
             )

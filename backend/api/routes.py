@@ -19,6 +19,8 @@ from llm.response_generator import generate_llm_response, build_llm_prompt_and_m
 from services.session_manager import SessionManager
 from services.validation import ValidationError
 from services.error_handler import ErrorHandler, ValidationService, ErrorCode
+from services.rag_evaluator import RAGEvaluator
+import config
 import asyncio
 import logging
 import uuid
@@ -33,6 +35,10 @@ UPLOAD_ROOT.mkdir(exist_ok=True)
 # Initialize session manager
 SESSIONS_FILE = pathlib.Path(__file__).parent.parent / "sessions.json"
 session_manager = SessionManager(SESSIONS_FILE)
+
+# Initialize RAG evaluator
+rag_evaluator = RAGEvaluator()
+
 
 
 def handle_api_error(error: Exception, error_msg: str, status_code: int = 500) -> JSONResponse:
@@ -242,6 +248,8 @@ async def answer(data: Ask):
             f"Received /answer request for technology_id: '{technology_id}', "
             f"session_id: '{data.session_id}', question: '{data.question[:100]}...'"
         )
+
+        logger.info(f"Configuration: RAG={config.ENABLE_RAG}, Prompt Engineering={config.ENABLE_PROMPT_ENGINEERING}")
         
         # Check if still processing
         if is_processing(technology_id):
@@ -259,21 +267,38 @@ async def answer(data: Ask):
                 ).model_dump()
             )
         
-        # Retrieve context
-        passages = get_cached_search(data.question, tech_id=technology_id, k=6)
-        if not passages:
-            logger.warning(
-                f"No passages found by get_cached_search for tech_id '{technology_id}', "
-                f"question '{data.question[:100]}...'"
-            )
-            context = "Nenhum contexto específico encontrado para esta pergunta."
+        # Retrieve context (only if RAG is enabled)
+        if config.ENABLE_RAG:
+            passages = get_cached_search(data.question, tech_id=technology_id, k=6)
+            if not passages:
+                logger.warning(
+                    f"No passages found by get_cached_search for tech_id '{technology_id}', "
+                    f"question '{data.question[:100]}...'"
+                )
+                context = "Nenhum contexto específico encontrado para esta pergunta."
+            else:
+                logger.info(f"Retrieved {len(passages)} passages for context. Trimming...")
+                context = trim_for_ctx(passages)
+                logger.info(f"Context after trimming (length: {len(context)} chars): '{context[:200]}...'")
         else:
-            logger.info(f"Retrieved {len(passages)} passages for context. Trimming...")
-            context = trim_for_ctx(passages)
-            logger.info(f"Context after trimming (length: {len(context)} chars): '{context[:200]}...'")
-        
+            logger.info("RAG DISABLED - No context will be retrieved")
+            context = ""
+
         # Build prompt and generate response
-        system_prompt, messages = build_llm_prompt_and_messages(technology_id, context, data.question)
+        if config.ENABLE_PROMPT_ENGINEERING:
+            system_prompt, messages = build_llm_prompt_and_messages(technology_id, context, data.question)
+        else:
+            logger.info("PROMPT ENGINEERING DISABLED - Using simple prompt")
+            system_prompt = "Você é um assistente especializado em Technology Readiness Level (TRL)."
+            if context:
+                user_content = f"Tecnologia: {technology_id}\nContexto: {context}\nPergunta: {data.question}"
+            else:
+                user_content = f"Tecnologia: {technology_id}\nPergunta: {data.question}"
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ]
         
         logger.info(f"Preparing LLM request: system_prompt={len(system_prompt)} chars, user_message={len(messages[1]['content'])} chars")
         
@@ -283,7 +308,28 @@ async def answer(data: Ask):
             f"LLM response for tech_id '{technology_id}', question '{data.question[:100]}...' -> "
             f"Response length: {len(response_content)} chars"
         )
-        
+
+        # Evaluate response for relevancy and faithfulness (if enabled)
+        if config.ENABLE_EVALUATION:
+            try:
+                logger.info("EVALUATION ENABLED - Calculating relevancy and faithfulness scores")
+                evaluation_results = await asyncio.to_thread(
+                    rag_evaluator.evaluate_response,
+                    data.question,
+                    response_content,
+                    context
+                )
+
+                relevancy_passing = evaluation_results.get("relevancy", {}).get("passing")
+                faithfulness_passing = evaluation_results.get("faithfulness", {}).get("passing")
+
+                logger.info(f"Evaluation results - Relevancy: {relevancy_passing}, Faithfulness: {faithfulness_passing}")
+
+            except Exception as e:
+                logger.warning(f"Error during response evaluation: {e}")
+        else:
+            logger.info("EVALUATION DISABLED - Skipping relevancy and faithfulness calculation")
+
         return AnswerResponse(
             answer=response_content,
             technology_id=technology_id,
