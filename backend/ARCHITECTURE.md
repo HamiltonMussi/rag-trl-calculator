@@ -28,6 +28,7 @@ backend/
 │   ├── session_manager.py     # Session management
 │   ├── llm_client.py          # LLM client abstraction
 │   ├── prompt_builder.py      # Prompt construction
+│   ├── rag_evaluator.py       # RAG response evaluation
 │   └── validation.py          # Input validation
 ├── processing/             # Document processing
 │   ├── indexer.py             # Document indexing orchestration
@@ -177,6 +178,20 @@ Validate → Search Collections → Build Messages → Generate → Format
 - **ERROR**: Error conditions that don't stop the application
 - **CRITICAL**: Serious errors that may cause application shutdown
 
+### 5. RAGEvaluator (`services/rag_evaluator.py`)
+
+Automated RAG response evaluation:
+- **Relevancy Testing**: Evaluates query-response-context alignment
+- **Faithfulness Testing**: Verifies response fidelity to source context
+- Uses external LLM (OpenAI) for evaluation to avoid self-evaluation bias
+- Configurable evaluation model and enable/disable flags
+
+**Key Features:**
+- Automated YES/NO evaluation for relevancy and faithfulness
+- Graceful degradation when evaluator unavailable
+- Structured evaluation results with pass/fail flags
+- Integration with answer generation pipeline
+
 ## Configuration Management
 
 Configuration is centralized in `config.py`:
@@ -184,16 +199,26 @@ Configuration is centralized in `config.py`:
 - **LLM Settings**: Local vs. OpenAI, model selection
 - **API Keys**: Secure handling of external service keys
 - **Model Parameters**: Tokenization and generation settings
+- **Evaluation Settings**: Test model selection and enable flags
 - **Environment Variables**: Support for .env files
 
 ## Testing Strategy
 
-The refactored architecture supports testing through:
+The architecture supports comprehensive testing through:
 
-1. **Service Isolation**: Each service can be tested independently
-2. **Dependency Injection**: Easy mocking of dependencies
-3. **Error Simulation**: Structured errors enable comprehensive error testing
-4. **Pure Functions**: Many utility functions are pure and easily testable
+1. **Automated RAG Evaluation**: Built-in relevancy and faithfulness testing via `RAGEvaluator`
+2. **Service Isolation**: Each service can be tested independently
+3. **Dependency Injection**: Easy mocking of dependencies
+4. **Error Simulation**: Structured errors enable comprehensive error testing
+5. **Pure Functions**: Many utility functions are pure and easily testable
+
+### RAG Testing Framework
+
+- **Real-time Evaluation**: Automatic testing of each generated response
+- **Dual Metrics**: Relevancy (query alignment) and faithfulness (context fidelity)
+- **External Evaluator**: Uses separate OpenAI model to avoid self-evaluation bias
+- **Configurable**: Enable/disable via `ENABLE_EVALUATION` environment variable
+- **Monitoring**: Detailed logging of evaluation results for quality tracking
 
 ## Performance Considerations
 
@@ -232,11 +257,3 @@ The refactored architecture supports testing through:
 - `create_semantic_chunks()` in `document_processor.py` → Use `DocumentProcessor`
 - Direct ChromaDB client usage → Use `ChromaDBService`
 - Manual error handling → Use `ErrorHandler`
-
-## Future Enhancements
-
-1. **Metrics and Monitoring**: Add application metrics and health checks
-2. **Caching Layer**: Implement Redis for response caching
-3. **Async Processing**: Convert blocking operations to async
-4. **API Versioning**: Support multiple API versions
-5. **Enhanced Security**: Add authentication and rate limiting

@@ -19,6 +19,7 @@ from llm.response_generator import generate_llm_response, build_llm_prompt_and_m
 from services.session_manager import SessionManager
 from services.validation import ValidationError
 from services.error_handler import ErrorHandler, ValidationService, ErrorCode
+from services.rag_evaluator import RAGEvaluator
 import config
 import asyncio
 import logging
@@ -34,6 +35,9 @@ UPLOAD_ROOT.mkdir(exist_ok=True)
 # Initialize session manager
 SESSIONS_FILE = pathlib.Path(__file__).parent.parent / "sessions.json"
 session_manager = SessionManager(SESSIONS_FILE)
+
+# Initialize RAG evaluator
+rag_evaluator = RAGEvaluator()
 
 
 
@@ -304,7 +308,28 @@ async def answer(data: Ask):
             f"LLM response for tech_id '{technology_id}', question '{data.question[:100]}...' -> "
             f"Response length: {len(response_content)} chars"
         )
-        
+
+        # Evaluate response for relevancy and faithfulness (if enabled)
+        if config.ENABLE_EVALUATION:
+            try:
+                logger.info("EVALUATION ENABLED - Calculating relevancy and faithfulness scores")
+                evaluation_results = await asyncio.to_thread(
+                    rag_evaluator.evaluate_response,
+                    data.question,
+                    response_content,
+                    context
+                )
+
+                relevancy_passing = evaluation_results.get("relevancy", {}).get("passing")
+                faithfulness_passing = evaluation_results.get("faithfulness", {}).get("passing")
+
+                logger.info(f"Evaluation results - Relevancy: {relevancy_passing}, Faithfulness: {faithfulness_passing}")
+
+            except Exception as e:
+                logger.warning(f"Error during response evaluation: {e}")
+        else:
+            logger.info("EVALUATION DISABLED - Skipping relevancy and faithfulness calculation")
+
         return AnswerResponse(
             answer=response_content,
             technology_id=technology_id,

@@ -59,7 +59,7 @@ class OpenAIClient(LLMClient):
                 model=self.model_name,
                 messages=validated_messages,
                 temperature=0.0,
-                max_tokens=2048,
+                max_tokens=512,
                 top_p=1.0,
                 n=1,
             )
