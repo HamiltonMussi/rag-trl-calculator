@@ -14,8 +14,8 @@ OPENAI_MODEL_NAME = "gpt-3.5-turbo"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Hugging Face Inference configuration
-# HF_MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct:featherless-ai"  
-HF_MODEL_NAME = "google/gemma-3-12b-it:featherless-ai"
+HF_MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct:featherless-ai"  
+# HF_MODEL_NAME = "google/gemma-3-12b-it:featherless-ai"
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
 # Test mode flags
