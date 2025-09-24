@@ -134,6 +134,12 @@
   align-items: center;
 }
 
+.ai-answer__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ai-answer__header-content {
   display: flex;
   align-items: center;
@@ -160,6 +166,27 @@
 .ai-answer__title {
   font-size: 16px;
   font-weight: 600;
+}
+
+.ai-answer__copy {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.ai-answer__copy:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.ai-answer__copy:active {
+  transform: scale(0.95);
 }
 
 .ai-answer__close {

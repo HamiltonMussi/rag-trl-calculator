@@ -154,7 +154,10 @@ export function showAnswer(text, relatedElement = null) {
                 </div>
                 <span class="ai-answer__title">Sugestão da IA</span>
             </div>
-            <button id="aiClose" class="ai-answer__close">×</button>
+            <div class="ai-answer__actions">
+                <button id="aiCopy" class="ai-answer__copy" title="Copiar resposta">📋</button>
+                <button id="aiClose" class="ai-answer__close">×</button>
+            </div>
         </div>
         <div class="ai-answer__content">
             <div class="ai-answer__text">${formattedText}</div>
@@ -168,6 +171,29 @@ export function showAnswer(text, relatedElement = null) {
     closeButton.addEventListener('click', () => {
         answerDiv.style.animation = 'slideOutToRight 0.3s ease-out forwards';
         setTimeout(() => removeElement(answerDiv), 300);
+    });
+
+    // Add copy functionality
+    const copyButton = answerDiv.querySelector('#aiCopy');
+    copyButton.addEventListener('click', async () => {
+        try {
+            // Get the text content without HTML tags
+            const textContent = answerDiv.querySelector('.ai-answer__text').innerText;
+            await navigator.clipboard.writeText(textContent);
+
+            // Show success feedback
+            copyButton.innerHTML = '✓';
+            copyButton.title = 'Copiado!';
+            setTimeout(() => {
+                copyButton.innerHTML = '📋';
+                copyButton.title = 'Copiar resposta';
+            }, 2000);
+
+            showNotification('Resposta copiada para a área de transferência!', 'success');
+        } catch (err) {
+            console.error('Erro ao copiar:', err);
+            showNotification('Erro ao copiar resposta', 'error');
+        }
     });
 
     // Add required styles
