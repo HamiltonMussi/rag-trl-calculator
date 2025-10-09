@@ -163,20 +163,7 @@ Validate → Search Collections → Build Messages → Generate → Format
 
 ## Logging Strategy
 
-### Structured Logging
-
-- **Context-aware logging**: Each service can add context to log messages
-- **Centralized configuration**: Single logging setup in `utils/logging_config.py`
-- **External library filtering**: Reduced verbosity from third-party libraries
-- **File rotation**: Automatic log file rotation with size limits
-
-### Log Levels
-
-- **DEBUG**: Detailed debugging information (disabled in production)
-- **INFO**: General operational messages
-- **WARNING**: Potentially problematic situations
-- **ERROR**: Error conditions that don't stop the application
-- **CRITICAL**: Serious errors that may cause application shutdown
+Centralized logging configuration in `utils/logging_config.py` with context-aware logging and external library filtering.
 
 ### 5. RAGEvaluator (`services/rag_evaluator.py`)
 
@@ -220,39 +207,13 @@ The architecture supports comprehensive testing through:
 - **Configurable**: Enable/disable via `ENABLE_EVALUATION` environment variable
 - **Monitoring**: Detailed logging of evaluation results for quality tracking
 
-## Performance Considerations
+## Performance & Security
 
-### Optimization Features
+**Optimization**: Lazy loading, caching, token-based chunking, and efficient database operations.
 
-1. **Lazy Loading**: Models loaded only when needed
-2. **Caching**: LRU cache for expensive operations
-3. **Device Management**: Optimal GPU/CPU device selection
-4. **Connection Pooling**: Efficient database connection reuse
-5. **Token Counting**: Accurate token-based chunking
+**Security**: Comprehensive input validation, file type restrictions, secure API key handling, and proper session management.
 
-### Scalability
-
-- **Stateless Services**: Most services are stateless and horizontally scalable
-- **Session Management**: Lightweight session tracking with cleanup
-- **Resource Management**: Proper cleanup and resource deallocation
-
-## Security Considerations
-
-1. **Input Validation**: Comprehensive validation of all inputs
-2. **File Type Restrictions**: Only allowed file types accepted
-3. **Error Information**: No sensitive information leaked in error messages
-4. **Session Security**: Session IDs properly validated
-5. **API Key Protection**: Secure handling of external API keys
-
-## Migration Notes
-
-### Backward Compatibility
-
-- Legacy functions maintained in `processing/document_processor.py`
-- Existing API contracts preserved
-- Database schema unchanged
-
-### Deprecated Components
+## Deprecated Components
 
 - `create_semantic_chunks()` in `document_processor.py` → Use `DocumentProcessor`
 - Direct ChromaDB client usage → Use `ChromaDBService`

@@ -86,32 +86,6 @@ Once documents are uploaded:
 2. Click any AI button to get intelligent suggestions based on your documentation
 3. Answers are formatted with justifications and confidence levels
 
-## Development
-
-### Code Standards
-
-- **ES6+ Modules**: All code uses modern JavaScript module syntax
-- **Async/Await**: Consistent async handling throughout
-- **Error Handling**: Comprehensive try-catch blocks with user feedback
-- **Accessibility**: WCAG 2.1 AA compliance
-- **Performance**: Optimized for fast loading and smooth interactions
-
-### CSS Architecture
-
-- **Component-based**: Styles organized by component functionality
-- **Utility Classes**: Tailwind-inspired utility system for rapid development
-- **Responsive**: Mobile-first design approach
-- **Animations**: Smooth, purposeful animations with reduced-motion support
-- **Accessibility**: High contrast, focus management, and screen reader support
-
-### Best Practices
-
-1. **Separation of Concerns**: Clear separation between HTML structure, CSS styling, and JavaScript behavior
-2. **DRY Principles**: No code duplication, reusable functions and components
-3. **Error Handling**: Graceful degradation with informative user feedback
-4. **Performance**: Lazy loading, efficient DOM manipulation, minimal reflows
-5. **Security**: Content Security Policy compliance, input sanitization
-
 ## API Integration
 
 The extension integrates with a local backend service at `http://127.0.0.1:8000` with the following endpoints:
@@ -123,48 +97,15 @@ The extension integrates with a local backend service at `http://127.0.0.1:8000`
 - `POST /answer`: Get AI responses to questions
 - `POST /status`: Check document processing status
 
-## Browser Compatibility
+## Requirements
 
-- Chrome 88+
-- Manifest V3 compliant
-- Modern JavaScript features (ES2020+)
-- CSS Grid and Flexbox support
+- Chrome 88+ (Manifest V3 compliant)
+- Backend server running at `http://127.0.0.1:8000`
 
-## Accessibility Features
+## Technical Details
 
-- Screen reader support with proper ARIA labels
-- Keyboard navigation for all interactive elements
-- High contrast mode support
-- Reduced motion preferences respected
-- Focus management and skip links
-- Semantic HTML structure
+- **Architecture**: ES6+ modules with modern JavaScript
+- **Accessibility**: WCAG 2.1 AA compliant
+- **Security**: Content Security Policy compliant
+- **Performance**: Optimized file upload with chunking
 
-## Performance Optimizations
-
-- Lazy loading of CSS and components
-- Efficient DOM manipulation with minimal reflows
-- Debounced user input handling
-- Optimized file upload with chunking
-- Memory management and cleanup
-
-## Security Considerations
-
-- Content Security Policy (CSP) compliant
-- Input sanitization and validation
-- Secure API communication
-- No inline scripts or styles
-- Minimal permissions model
-
-## Version History
-
-### v0.2 (Current)
-- Complete refactor with modern architecture
-- ES6+ modules and improved error handling
-- Enhanced accessibility and responsive design
-- Comprehensive file management system
-- Performance optimizations
-
-### v0.1 (Legacy)
-- Initial implementation
-- Basic AI assistance functionality
-- Simple file upload capabilities
