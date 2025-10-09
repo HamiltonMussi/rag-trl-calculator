@@ -19,7 +19,7 @@ cp .env.example .env
 ### 2. Run the Server
 
 ```bash
-python main.py
+uvicorn main:app --reload
 ```
 
 Server runs at `http://localhost:8000`

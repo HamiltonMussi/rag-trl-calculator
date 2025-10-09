@@ -50,7 +50,7 @@ cp .env.example .env
 # Edit .env with your OpenAI and HuggingFace API keys
 
 # Run server
-python main.py
+uvicorn main:app --reload
 ```
 
 Server runs at `http://localhost:8000`
